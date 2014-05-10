@@ -5,12 +5,21 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.command.OCommandContext;
+import com.orientechnologies.orient.core.command.OCommandPredicate;
+import com.orientechnologies.orient.core.command.traverse.OTraverse;
+import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.id.ORecordId;
+import com.orientechnologies.orient.core.record.ORecord;
+import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
+import com.orientechnologies.orient.server.distributed.task.OSQLCommandTask;
 import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.api.model.Repository;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -82,13 +91,19 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
     }
 
     @Override
-    public T findOne(EntityFilter<T> tEntityFilter) {
+    public T findOne(final EntityFilter<T> tEntityFilter) {
+        for (T entity : db.browseClass(entityClass)){
+            if(tEntityFilter.accept(entity)){
+                return entity;
+            }
+        }
+
         return null;
     }
 
     @Override
     public boolean exists(String id) {
-        return false;
+        return  db.existsUserObjectByRID(new ORecordId(id));
     }
 
     @Override
@@ -98,12 +113,27 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
 
     @Override
     public Iterable<T> findAll(Iterable<String> ids) {
-        return null;
+        List<T> entities = new ArrayList<T>();
+
+        for(String id: ids){
+            entities.add((T) db.load(new ORecordId(id)));
+        }
+
+
+        return entities;
     }
 
     @Override
     public Iterable<T> findAll(EntityFilter<T> tEntityFilter) {
-        return null;
+        List<T> entities = new ArrayList<T>();
+
+        for (T entity : db.browseClass(entityClass)){
+            if(tEntityFilter.accept(entity)){
+                entities.add(entity);
+            }
+        }
+
+        return entities;
     }
 
     @Override
