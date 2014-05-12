@@ -42,7 +42,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
     /**
      * Flag used in order to know if the instance is used during a transaction in the current thread.
      */
-    private ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>(){
+    private static final ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>(){
         @Override
         protected Boolean initialValue() {
             return false;
@@ -120,8 +120,6 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         acquire();
         List<T> deleted = new ArrayList<T>();
         try {
-
-
             for (T todel : ts) {
                 deleted.add((T) db.delete(todel));
             }
