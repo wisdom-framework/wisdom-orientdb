@@ -5,15 +5,10 @@
 
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.core.command.OCommandContext;
-import com.orientechnologies.orient.core.command.OCommandPredicate;
-import com.orientechnologies.orient.core.command.traverse.OTraverse;
-import com.orientechnologies.orient.core.db.record.OIdentifiable;
 import com.orientechnologies.orient.core.id.ORecordId;
-import com.orientechnologies.orient.core.record.ORecord;
-import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.core.tx.OTransaction;
+import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
-import com.orientechnologies.orient.server.distributed.task.OSQLCommandTask;
 import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.api.model.Repository;
@@ -29,17 +24,64 @@ import java.util.concurrent.Callable;
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
-public class OrientDbCrudService<T> implements Crud<T,String> {
-    private final OObjectDatabaseTx db;
+public class OrientDbCrudService<T> implements Crud<T, String> {
+    private OObjectDatabaseTx db;
+
+    private final OrientDbRepository repo;
 
     private final Class<T> entityClass;
 
-    public OrientDbCrudService(OObjectDatabaseTx objectDb, Class<T> entityClass) {
-        db = objectDb;
+
+    private final OObjectDatabasePool pool;
+
+    /**
+     * Transaction type.
+     */
+    private final OTransaction.TXTYPE txtype;
+
+    /**
+     * Flag used in order to know if the instance is used during a transaction in the current thread.
+     */
+    private ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>(){
+        @Override
+        protected Boolean initialValue() {
+            return false;
+        }
+    };
+
+    public OrientDbCrudService(OrientDbRepository repo, Class<T> entityClass) {
+        txtype = OTransaction.TXTYPE.OPTIMISTIC;
+
+        this.repo = repo;
+        pool = repo.get();
+
         this.entityClass = entityClass;
+        transaction.set(false);
+
+        db = pool.acquire(); //get the database from the pool
         //Should we register the class if not present ?
         db.getEntityManager().registerEntityClass(entityClass);
+        db.close(); //release
     }
+
+    /**
+     * Acquire the database connection from the pool.
+     */
+    private void acquire() {
+        if (db.isClosed()) {
+            db = pool.acquire();
+        }
+    }
+
+    /**
+     * Release the database connection to the pool
+     */
+    private void release() {
+        if (!transaction.get()) {
+            db.close();
+        }
+    }
+
 
     @Override
     public Class<T> getEntityClass() {
@@ -53,49 +95,88 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
 
     @Override
     public T delete(T t) {
-        db.delete(t);
+        acquire();
+        try {
+            db.delete(t);
+        } finally {
+            release();
+        }
         return t;
     }
 
     @Override
     public void delete(String id) {
         ORecordId rid = new ORecordId(id);
-        db.delete(rid);
+        acquire();
+        try {
+            db.delete(rid);
+        } finally {
+            release();
+        }
     }
 
     @Override
     public Iterable<T> delete(Iterable<T> ts) {
-        for(T todel : ts){
-            db.delete(todel);
+        acquire();
+        List<T> deleted = new ArrayList<T>();
+        try {
+
+
+            for (T todel : ts) {
+                deleted.add((T) db.delete(todel));
+            }
+        } finally {
+            release();
         }
-        return ts;
+        return deleted;
     }
 
     @Override
     public T save(T t) {
-        return db.save(t);
+        acquire();
+        try {
+            return db.save(t);
+        } finally {
+            release();
+        }
     }
 
     @Override
     public Iterable<T> save(Iterable<T> ts) {
-        for(T tosave : ts){
-            db.save(tosave);
+        List<T> saved = new ArrayList<T>();
+        acquire();
+        try {
+            for (T tosave : ts) {
+                saved.add((T) db.save(tosave));
+            }
+        } finally {
+            release();
         }
 
-        return ts;
+        return saved;
     }
 
     @Override
     public T findOne(String id) {
-        return db.load(new ORecordId(id));
+        acquire();
+        try {
+            return db.load(new ORecordId(id));
+        } finally {
+            release();
+        }
     }
 
     @Override
     public T findOne(final EntityFilter<T> tEntityFilter) {
-        for (T entity : db.browseClass(entityClass)){
-            if(tEntityFilter.accept(entity)){
-                return entity;
+        acquire();
+        try {
+            for (T entity : db.browseClass(entityClass)) {
+                if (tEntityFilter.accept(entity)) {
+                    return entity;
+                }
             }
+        } finally {
+            release();
         }
 
         return null;
@@ -103,20 +184,35 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
 
     @Override
     public boolean exists(String id) {
-        return  db.existsUserObjectByRID(new ORecordId(id));
+        acquire();
+        try {
+            return db.existsUserObjectByRID(new ORecordId(id));
+        } finally {
+            release();
+        }
     }
 
     @Override
     public Iterable<T> findAll() {
-        return db.browseClass(entityClass);
+        acquire();
+        try {
+            return db.browseClass(entityClass);
+        } finally {
+            release();
+        }
     }
 
     @Override
     public Iterable<T> findAll(Iterable<String> ids) {
+        acquire();
         List<T> entities = new ArrayList<T>();
+        try {
 
-        for(String id: ids){
-            entities.add((T) db.load(new ORecordId(id)));
+            for (String id : ids) {
+                entities.add((T) db.load(new ORecordId(id)));
+            }
+        } finally {
+            release();
         }
 
 
@@ -125,14 +221,18 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
 
     @Override
     public Iterable<T> findAll(EntityFilter<T> tEntityFilter) {
+        acquire();
         List<T> entities = new ArrayList<T>();
+        try {
 
-        for (T entity : db.browseClass(entityClass)){
-            if(tEntityFilter.accept(entity)){
-                entities.add(entity);
+            for (T entity : db.browseClass(entityClass)) {
+                if (tEntityFilter.accept(entity)) {
+                    entities.add(entity);
+                }
             }
+        } finally {
+            release();
         }
-
         return entities;
     }
 
@@ -143,12 +243,14 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
 
     @Override
     public Repository getRepository() {
-        return null;
+        return repo;
     }
 
     @Override
     public void executeTransactionalBlock(Runnable runnable) {
-        db.begin();
+        transaction.set(true);
+        acquire();
+        db.begin(txtype);
 
         try {
             runnable.run();
@@ -156,13 +258,16 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
         } catch (Exception e) {
             db.rollback();
         } finally {
-            //db.close();
+            transaction.set(false);
+            release();
         }
     }
 
     @Override
     public <A> A executeTransactionalBlock(Callable<A> aCallable) {
-        db.begin();
+        transaction.set(true);
+        acquire();
+        db.begin(txtype);
         try {
             A result = aCallable.call();
             db.commit();
@@ -171,7 +276,8 @@ public class OrientDbCrudService<T> implements Crud<T,String> {
             db.rollback();
             return null;
         } finally {
-            //db.close();
+            transaction.set(false);
+            release();
         }
     }
 }

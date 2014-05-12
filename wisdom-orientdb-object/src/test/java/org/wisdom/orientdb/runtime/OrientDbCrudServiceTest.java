@@ -8,8 +8,12 @@ package org.wisdom.orientdb.runtime;
 import com.orientechnologies.orient.core.command.OCommandContext;
 import com.orientechnologies.orient.core.command.OCommandPredicate;
 import com.orientechnologies.orient.core.command.traverse.OTraverse;
+import com.orientechnologies.orient.core.metadata.security.ORole;
+import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.ORecord;
 import com.orientechnologies.orient.core.record.impl.ODocument;
+import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -32,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class OrientDbCrudServiceTest {
     private static OObjectDatabaseTx db;
-    private static Crud<Hello,String> crud;
+    private static Crud<Hello, String> crud;
 
     @Entity
     public class Hello {
@@ -80,37 +84,52 @@ public class OrientDbCrudServiceTest {
     public static TemporaryFolder folder = new TemporaryFolder();
 
     @BeforeClass
-    public static void setUp() throws IOException{
+    public static void setUp() throws IOException {
         folder.create();
-        db = new OObjectDatabaseTx("plocal:"+folder.getRoot().getAbsolutePath()).create();
-        crud = new OrientDbCrudService<Hello>(db,Hello.class);
+        String url = "plocal:" + folder.getRoot().getAbsolutePath();
+
+        db = new OObjectDatabaseTx(url).create();
+        OSecurity sm = db.getMetadata().getSecurity();
+        OUser user = sm.createUser("test", "test", new String[]{"admin"});
+        //db.setUser(user);
+
+        crud = new OrientDbCrudService<Hello>(new OrientDbRepository(new OObjectDatabasePool(url, "test", "test")), Hello.class);
+
     }
 
     @AfterClass
-    public static void tearDown(){
-        db.close();
-        folder.delete();
+    public static void tearDown() {
+        try {
+            db.drop();
+
+        } finally {
+            if (!db.isClosed()) {
+                db.close();
+            }
+            folder.delete();
+        }
+
     }
 
     @After
-    public void afterEach(){
+    public void afterEach() {
         //db.drop();
     }
 
 
-    public void beforeEach(){
+    public void beforeEach() {
     }
 
     @Test
-    public void shouldProperlyAddTheEntityToTheManager(){
+    public void shouldProperlyAddTheEntityToTheManager() {
         db.getEntityManager().deregisterEntityClass(Hello.class);
         assertThat(db.getEntityManager().getRegisteredEntities()).doesNotContain(Hello.class);
-        new OrientDbCrudService<Hello>(db,Hello.class);
+        new OrientDbCrudService<Hello>(new OrientDbRepository(new OObjectDatabasePool("plocal:" + folder.getRoot(), "test", "test")), Hello.class);
         assertThat(db.getEntityManager().getRegisteredEntities()).contains(Hello.class);
     }
 
     @Test
-    public void saveShouldPersistTheInstance(){
+    public void saveShouldPersistTheInstance() {
         Hello hello = new Hello();
         hello.setName("John");
         Hello saved = crud.save(hello);
@@ -121,7 +140,7 @@ public class OrientDbCrudServiceTest {
     }
 
     @Test
-    public void findShouldReturnInstanceIfPresent(){
+    public void findShouldReturnInstanceIfPresent() {
         Hello hello = new Hello();
         hello.setName("Bob");
         Hello saved = crud.save(hello);
@@ -132,7 +151,7 @@ public class OrientDbCrudServiceTest {
     }
 
     @Test
-    public void findOneShouldReturnNullIfNotPresent(){
+    public void findOneShouldReturnNullIfNotPresent() {
         Hello hello = new Hello();
         hello.setName("Bob");
         Hello saved = crud.save(hello);
@@ -143,12 +162,12 @@ public class OrientDbCrudServiceTest {
     }
 
     @Test
-    public void findOneWithEntityFilterShouldReturnMatchingEntities(){
+    public void findOneWithEntityFilterShouldReturnMatchingEntities() {
         Hello hello;
 
-        for(int i = 0;i<5;i++){
+        for (int i = 0; i < 5; i++) {
             hello = new Hello();
-            hello.setName("Bob"+i);
+            hello.setName("Bob" + i);
             crud.save(hello);
         }
 
@@ -162,7 +181,6 @@ public class OrientDbCrudServiceTest {
         assertThat(h).isNotNull();
         assertThat(h.getName()).matches("Bob[0-9]");
     }
-
 
 
 }
