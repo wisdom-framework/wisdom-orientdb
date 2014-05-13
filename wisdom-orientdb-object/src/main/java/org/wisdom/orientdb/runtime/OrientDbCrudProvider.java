@@ -5,6 +5,9 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.metadata.security.OUser;
+import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.apache.felix.ipojo.annotations.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -16,9 +19,12 @@ import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.conf.WOrientConf;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.io.File;
+import java.util.*;
+
+import java.net.URL;
+
+import static java.io.File.pathSeparator;
 
 /**
  * created: 5/13/14.
@@ -72,15 +78,49 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         Collection<OrientDbRepository> repos = new HashSet<>();
         BundleWiring wiring = bundle.adapt(BundleWiring.class);
         Iterator<WOrientConf> confIt = confs.iterator();
+        List<Class> entities = new ArrayList<>();
 
         for(WOrientConf conf: confs){
-            for(Capability cap: wiring.getResourceCapabilities("osgi.wiring.package")){
 
-                if(cap.getAttributes().get("osgi.wiring.package").equals(conf.getNameSpace())){
-                    repos.add(new OrientDbRepository(conf,wiring.getClassLoader(),context));
-                    break;
-                }
+            Enumeration<URL> enums = bundle.findEntries(conf.getNameSpace().replace(".", pathSeparator), "*.class", true);
+
+            if(!enums.hasMoreElements()){
+                break; //next configuration
             }
+
+            OrientDbRepository repo  = new OrientDbRepository(conf);
+            OObjectDatabaseTx db;
+
+            do{
+                URL entry = enums.nextElement();
+                try {
+                    entities.add(bundle.loadClass(entry.getPath().replace(pathSeparator, ".")));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }while (enums.hasMoreElements());
+
+            try{
+                db = repo.get().acquire();
+            }catch(Exception e){
+                if(appConf.isProd()){
+                    throw e;
+                }
+
+                //Create the database if in test or dev. mode
+                db = new OObjectDatabaseTx(conf.getUrl()).create();
+                OSecurity sm = db.getMetadata().getSecurity();
+                OUser user = sm.createUser(conf.getUser(), conf.getPass(), new String[]{"admin"});
+            }
+
+            for(Class entity: entities){
+                repo.registerCrudService(entity,context);
+            }
+
+            db.close();
+
+            entities.clear();
+            repos.add(repo);
         }
 
         return repos;
@@ -97,7 +137,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepository> repositories) {
         ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
         for(OrientDbRepository repo: repositories){
-            repo.destroy(loader);
+            repo.destroy();
         }
     }
 }

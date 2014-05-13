@@ -49,7 +49,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         }
     };
 
-    public OrientDbCrudService(OrientDbRepository repo, Class<T> entityClass) {
+    protected OrientDbCrudService(OrientDbRepository repo, Class<T> entityClass) {
         txtype = OTransaction.TXTYPE.OPTIMISTIC;
         this.repo = repo;
         pool = repo.get();

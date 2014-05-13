@@ -45,11 +45,9 @@ public class OrientDbCrudServiceTest {
         OSecurity sm = db.getMetadata().getSecurity();
         OUser user = sm.createUser("test", "test", new String[]{"admin"});
         WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model");
+        db.getEntityManager().registerEntityClass(Hello.class);
 
-        BundleContext context = mock(BundleContext.class);
-        when(context.registerService(eq(Crud.class), any(Crud.class), eq(conf.toDico()))).thenReturn(mock(ServiceRegistration.class));
-
-        crud = new OrientDbCrudService<Hello>(new OrientDbRepository(conf,OrientDbCrudServiceTest.class.getClassLoader(), mock(BundleContext.class)),Hello.class);
+        crud = new OrientDbCrudService<Hello>(new OrientDbRepository(conf),Hello.class);
     }
 
     @AfterClass
