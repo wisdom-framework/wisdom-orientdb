@@ -43,10 +43,12 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
-        confs = WOrientConf.extractFromParent(conf);
+        confs = WOrientConf.createFromApplicationConf(conf);
 
-        bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
-        bundleTracker.open();
+        if(!confs.isEmpty()){
+            bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
+            bundleTracker.open();
+        }
     }
 
     @Invalidate

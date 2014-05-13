@@ -81,7 +81,13 @@ public class WOrientConf {
      * @param config
      * @return
      */
-    public static Collection<WOrientConf> extractFromParent(Configuration config) {
+    public static Collection<WOrientConf> createFromApplicationConf(Configuration config) {
+        Configuration orient = config.getConfiguration(ORIENTDB_PREFIX);
+
+        if(orient == null){
+            return Collections.EMPTY_SET;
+        }
+
         Set<String> subkeys = new HashSet<String>();
 
         for (String key : config.getConfiguration(ORIENTDB_PREFIX).asProperties().stringPropertyNames()) {
