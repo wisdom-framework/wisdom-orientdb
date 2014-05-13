@@ -51,24 +51,17 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
 
     public OrientDbCrudService(OrientDbRepository repo, Class<T> entityClass) {
         txtype = OTransaction.TXTYPE.OPTIMISTIC;
-
         this.repo = repo;
         pool = repo.get();
-
         this.entityClass = entityClass;
         transaction.set(false);
-
-        db = pool.acquire(); //get the database from the pool
-        //Should we register the class if not present ?
-        db.getEntityManager().registerEntityClass(entityClass);
-        db.close(); //release
     }
 
     /**
      * Acquire the database connection from the pool.
      */
     private void acquire() {
-        if (db.isClosed()) {
+        if (db == null || db.isClosed()) {
             db = pool.acquire();
         }
     }

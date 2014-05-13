@@ -1,4 +1,5 @@
 Export-Package: org.iq80.snappy;version=0.3, \
     org.wisdom.orientdb.object
-Private-Package: org.wisdom.orientdb.runtime
+Private-Package: org.wisdom.orientdb.runtime, \
+    org.wisdom.orientdb.conf
 Import-Package: org.apache.hadoop.io.compress;resolution:=optional, *
