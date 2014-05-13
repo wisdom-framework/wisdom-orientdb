@@ -1,5 +1,7 @@
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
@@ -25,8 +27,14 @@ public class OrientDbRepository implements Repository<OObjectDatabasePool>{
         this.server = new OObjectDatabasePool(conf.getUrl(),conf.getUser(),conf.getPass());
         Collection<Class<?>> entities;
         this.conf = conf;
-
-        OObjectDatabaseTx db = server.acquire();
+        OObjectDatabaseTx db;
+        try{
+            db = server.acquire();
+        }catch (Exception e){
+            db = new OObjectDatabaseTx(conf.getUrl()).create();
+            OSecurity sm = db.getMetadata().getSecurity();
+            OUser user = sm.createUser(conf.getUser(), conf.getPass(), new String[]{"admin"});
+        }
 
         db.getEntityManager().registerEntityClasses(conf.getNameSpace(),loader);
 

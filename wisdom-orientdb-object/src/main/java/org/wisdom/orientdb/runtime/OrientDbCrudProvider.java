@@ -10,28 +10,32 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Capability;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.conf.WOrientConf;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * created: 5/13/14.
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
-@Component
-@Instantiate
+@Component(name = OrientDbCrudProvider.COMPONENT_NAME)
+@Instantiate(name = OrientDbCrudProvider.INSTANCE_NAME)
 public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<OrientDbRepository>> {
+    public static final String COMPONENT_NAME = "wisdom:orientdb:crudservice:factory";
+    public static final String INSTANCE_NAME = "wisdom:orientdb:crudservice:provider";
+
 
     @Requires
-    private ApplicationConfiguration conf;
+    private ApplicationConfiguration appConf;
 
     private final BundleContext context;
-
-    private final Map<Bundle,OrientDbRepository> repositories = new HashMap<Bundle, OrientDbRepository>(2);
 
     private BundleTracker<Collection<OrientDbRepository>> bundleTracker;
 
@@ -43,7 +47,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
-        confs = WOrientConf.createFromApplicationConf(conf);
+        confs = WOrientConf.createFromApplicationConf(appConf);
 
         if(!confs.isEmpty()){
             bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
@@ -70,9 +74,12 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         Iterator<WOrientConf> confIt = confs.iterator();
 
         for(WOrientConf conf: confs){
+            for(Capability cap: wiring.getResourceCapabilities("osgi.wiring.package")){
 
-            if(!wiring.getCapabilities(conf.getNameSpace()).isEmpty()){
-                repos.add(new OrientDbRepository(conf,wiring.getClassLoader(),context));
+                if(cap.getAttributes().get("osgi.wiring.package").equals(conf.getNameSpace())){
+                    repos.add(new OrientDbRepository(conf,wiring.getClassLoader(),context));
+                    break;
+                }
             }
         }
 

@@ -90,14 +90,14 @@ public class WOrientConf {
 
         Set<String> subkeys = new HashSet<String>();
 
-        for (String key : config.getConfiguration(ORIENTDB_PREFIX).asProperties().stringPropertyNames()) {
+        for (String key : orient.asProperties().stringPropertyNames()) {
             subkeys.add(key.split("\\.", 2)[0]);
         }
 
         Collection<WOrientConf> subconfs = new ArrayList<WOrientConf>(subkeys.size());
 
         for (String subkey : subkeys) {
-            subconfs.add(new WOrientConf(subkey, config.getConfiguration(subkey)));
+            subconfs.add(new WOrientConf(subkey, orient.getConfiguration(subkey)));
         }
 
         return subconfs;
