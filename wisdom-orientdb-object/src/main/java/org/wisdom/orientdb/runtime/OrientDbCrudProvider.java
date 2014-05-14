@@ -5,6 +5,7 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.apache.felix.ipojo.annotations.*;
@@ -49,6 +50,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
+        Orient.instance().startup();
+        Orient.instance().removeShutdownHook();
         confs = WOrientConf.createFromApplicationConf(appConf);
 
         if(!confs.isEmpty()){
@@ -62,6 +65,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         if(bundleTracker != null){
             bundleTracker.close();
         }
+
+        Orient.instance().shutdown();
     }
 
 
