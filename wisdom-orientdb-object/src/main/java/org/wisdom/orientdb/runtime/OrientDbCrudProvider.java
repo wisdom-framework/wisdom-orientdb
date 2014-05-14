@@ -5,26 +5,22 @@
 
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.core.metadata.security.OSecurity;
-import com.orientechnologies.orient.core.metadata.security.OUser;
+import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.apache.felix.ipojo.annotations.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.wiring.BundleWiring;
-import org.osgi.resource.Capability;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.conf.WOrientConf;
 
-import java.io.File;
+import java.net.URL;
 import java.util.*;
 
-import java.net.URL;
-
-import static java.io.File.pathSeparator;
+import static java.io.File.separator;
 
 /**
  * created: 5/13/14.
@@ -82,24 +78,27 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
         for(WOrientConf conf: confs){
 
-            Enumeration<URL> enums = bundle.findEntries(conf.getNameSpace().replace(".", pathSeparator), "*.class", true);
+            Enumeration<URL> enums = bundle.findEntries(packageNameToPath(conf.getNameSpace()), "*.class", true);
 
-            if(!enums.hasMoreElements()){
+            if(enums== null || !enums.hasMoreElements()){
                 break; //next configuration
             }
 
+            //Create a pull for this configuration
             OrientDbRepository repo  = new OrientDbRepository(conf);
             OObjectDatabaseTx db;
 
+            //Load the entities from the bundle
             do{
                 URL entry = enums.nextElement();
                 try {
-                    entities.add(bundle.loadClass(entry.getPath().replace(pathSeparator, ".")));
+                    entities.add(bundle.loadClass(urlToClassName(entry)));
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }while (enums.hasMoreElements());
 
+            //Get the connection from the pool
             try{
                 db = repo.get().acquire();
             }catch(Exception e){
@@ -109,17 +108,23 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
                 //Create the database if in test or dev. mode
                 db = new OObjectDatabaseTx(conf.getUrl()).create();
-                OSecurity sm = db.getMetadata().getSecurity();
-                OUser user = sm.createUser(conf.getUser(), conf.getPass(), new String[]{"admin"});
+
+                //Add the user as admin to the newly created db.
+                db.getMetadata().getSecurity().createUser(conf.getUser(), conf.getPass(), new String[]{ORole.ADMIN});
             }
 
+            //Register a crud service for each entity
             for(Class entity: entities){
                 repo.registerCrudService(entity,context);
             }
 
+            //close the db
             db.close();
 
+            //clear the entity list
             entities.clear();
+
+            //add this configuration repo
             repos.add(repo);
         }
 
@@ -139,5 +144,14 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         for(OrientDbRepository repo: repositories){
             repo.destroy();
         }
+    }
+
+    private static String urlToClassName(URL url){
+        String path = url.getPath();
+        return path.replace(separator,".").substring(1,path.lastIndexOf("."));
+    }
+
+    private static String packageNameToPath(String packageName){
+        return separator + packageName.replace(".",separator);
     }
 }
