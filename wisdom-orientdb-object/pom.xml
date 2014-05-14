@@ -52,11 +52,6 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.0-api</artifactId>
-            <version>1.0.1.Final</version>
-        </dependency>
 
         <!-- OrientDB dep. -->
         <dependency>
@@ -67,27 +62,32 @@
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orientdb-server</artifactId>
-        </dependency>
+        
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-object</artifactId>
         </dependency>
+        
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-client</artifactId>
         </dependency>
-
+        
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
-            <dependency>
+        
+        <dependency>
             <groupId>org.iq80.snappy</groupId>
             <artifactId>snappy</artifactId>
             <version>0.3</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.0-api</artifactId>
+            <version>1.0.1.Final</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -119,13 +119,6 @@
             <artifactId>slf4j-jcl</artifactId>
             <version>1.7.6</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- Additional applications -->
-        <dependency>
-            <groupId>org.wisdom-framework</groupId>
-            <artifactId>documentation</artifactId>
-            <version>0.6-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
