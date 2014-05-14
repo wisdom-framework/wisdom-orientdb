@@ -126,7 +126,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
     public T save(T t) {
         acquire();
         try {
-            return db.save(t);
+            return db.detach(db.save(t),true);
         } finally {
             release();
         }
@@ -138,7 +138,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         acquire();
         try {
             for (T tosave : ts) {
-                saved.add((T) db.save(tosave));
+                saved.add((T) db.detach(db.save(tosave),true));
             }
         } finally {
             release();
@@ -151,7 +151,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
     public T findOne(String id) {
         acquire();
         try {
-            return db.load(new ORecordId(id));
+            return db.detach(db.load(new ORecordId(id)),true);
         } finally {
             release();
         }
@@ -163,7 +163,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         try {
             for (T entity : db.browseClass(entityClass)) {
                 if (tEntityFilter.accept(entity)) {
-                    return entity;
+                    return db.detach(entity,true);
                 }
             }
         } finally {
@@ -186,11 +186,15 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
     @Override
     public Iterable<T> findAll() {
         acquire();
+        List<T> entities = new ArrayList<T>();
         try {
-            return db.browseClass(entityClass);
+            for(T entity : db.browseClass(entityClass)){
+                entities.add((T) db.detach(entity,true));
+            }
         } finally {
             release();
         }
+        return entities;
     }
 
     @Override
@@ -200,12 +204,11 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         try {
 
             for (String id : ids) {
-                entities.add((T) db.load(new ORecordId(id)));
+                entities.add((T) db.detach(db.load(new ORecordId(id)),true));
             }
         } finally {
             release();
         }
-
 
         return entities;
     }
@@ -218,7 +221,7 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
 
             for (T entity : db.browseClass(entityClass)) {
                 if (tEntityFilter.accept(entity)) {
-                    entities.add(entity);
+                    entities.add((T) db.detach(entity,true));
                 }
             }
         } finally {
