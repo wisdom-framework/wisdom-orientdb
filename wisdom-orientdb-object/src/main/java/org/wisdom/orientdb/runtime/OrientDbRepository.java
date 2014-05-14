@@ -1,8 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.entity.OEntityManager;
-import com.orientechnologies.orient.core.metadata.security.OSecurity;
-import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
@@ -11,8 +9,9 @@ import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.conf.WOrientConf;
 
-import javax.persistence.EntityManager;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by barjo on 5/10/14.

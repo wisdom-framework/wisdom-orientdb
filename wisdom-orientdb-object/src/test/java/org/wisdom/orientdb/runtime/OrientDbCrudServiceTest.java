@@ -10,8 +10,6 @@ import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.orientdb.conf.WOrientConf;
@@ -20,10 +18,6 @@ import org.wisdom.orientdb.model.Hello;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * created: 5/9/14.
