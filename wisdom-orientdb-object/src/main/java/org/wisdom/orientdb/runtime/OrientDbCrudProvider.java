@@ -12,19 +12,22 @@ import org.apache.felix.ipojo.annotations.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
-import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.conf.WOrientConf;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
 
 import static java.io.File.separator;
 
 /**
  * created: 5/13/14.
+ *
+ * TODO user logger
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
@@ -50,7 +53,10 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
+        //Not sure if orient has already been startup?
         Orient.instance().startup();
+
+        //remove the hook since we handle shutdown in the stop callback
         Orient.instance().removeShutdownHook();
         confs = WOrientConf.createFromApplicationConf(appConf);
 
@@ -77,9 +83,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         }
 
         Collection<OrientDbRepository> repos = new HashSet<>();
-        BundleWiring wiring = bundle.adapt(BundleWiring.class);
-        Iterator<WOrientConf> confIt = confs.iterator();
-        List<Class> entities = new ArrayList<>();
 
         for(WOrientConf conf: confs){
 
@@ -88,20 +91,11 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             if(enums== null || !enums.hasMoreElements()){
                 break; //next configuration
             }
+            System.out.println("Call!");
 
             //Create a pull for this configuration
             OrientDbRepository repo  = new OrientDbRepository(conf);
             OObjectDatabaseTx db;
-
-            //Load the entities from the bundle
-            do{
-                URL entry = enums.nextElement();
-                try {
-                    entities.add(bundle.loadClass(urlToClassName(entry)));
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }while (enums.hasMoreElements());
 
             //Get the connection from the pool
             try{
@@ -113,21 +107,31 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
                 //Create the database if in test or dev. mode
                 db = new OObjectDatabaseTx(conf.getUrl()).create();
-
                 //Add the user as admin to the newly created db.
                 db.getMetadata().getSecurity().createUser(conf.getUser(), conf.getPass(), new String[]{ORole.ADMIN});
             }
 
-            //Register a crud service for each entity
-            for(Class entity: entities){
-                repo.registerCrudService(entity,context);
-            }
+
+            //if(!db.exists()){
+            //
+            //}
+
+            //Load the entities from the bundle
+            do{
+                URL entry = enums.nextElement();
+                try {
+                    repo.addCrubService(bundle.loadClass(urlToClassName(entry)));
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }while (enums.hasMoreElements());
+
+
+            //register all crud service available in this repo
+            repo.registerAllCrud(context);
 
             //close the db
             db.close();
-
-            //clear the entity list
-            entities.clear();
 
             //add this configuration repo
             repos.add(repo);
@@ -139,13 +143,13 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     @Override
     public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepository> repositories) {
         //TODO very dummy fix that
-        removedBundle(bundle,bundleEvent,repositories);
-        addingBundle(bundle,bundleEvent);
+        //removedBundle(bundle,bundleEvent,repositories);
+        //addingBundle(bundle,bundleEvent);
+        System.out.println("MODIFIED!");
     }
 
     @Override
     public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepository> repositories) {
-        ClassLoader loader = bundle.adapt(BundleWiring.class).getClassLoader();
         for(OrientDbRepository repo: repositories){
             repo.destroy();
         }
