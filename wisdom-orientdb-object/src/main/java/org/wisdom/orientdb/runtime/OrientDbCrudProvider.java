@@ -5,9 +5,15 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
+import com.orientechnologies.orient.object.enhancement.OObjectProxyMethodHandler;
 import org.apache.felix.ipojo.annotations.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -15,8 +21,10 @@ import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.wisdom.api.configuration.ApplicationConfiguration;
+import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -41,6 +49,22 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     @Requires
     private ApplicationConfiguration appConf;
 
+    @Requires
+    private JacksonModuleRepository moduleRepository;
+
+    private static final SimpleModule module = new SimpleModule("Orientdb Ignore Proxy");
+
+    static {
+        module.addSerializer(OObjectProxyMethodHandler.class, new JsonSerializer<OObjectProxyMethodHandler>() {
+            @Override
+            public void serialize(OObjectProxyMethodHandler oObjectProxyMethodHandler, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
+                jsonGenerator.writeStartObject();
+                jsonGenerator.writeStartObject();
+            }
+        });
+    }
+
+
     private final BundleContext context;
 
     private BundleTracker<Collection<OrientDbRepository>> bundleTracker;
@@ -53,6 +77,9 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
+        //Ignore javaassit injected handler created by Orientdb for json serialization
+        moduleRepository.register(module);
+
         //Not sure if orient has already been startup?
         Orient.instance().startup();
 
@@ -73,6 +100,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         }
 
         Orient.instance().shutdown();
+
+        moduleRepository.unregister(module);
     }
 
 
