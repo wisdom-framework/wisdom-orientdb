@@ -120,7 +120,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             if(enums== null || !enums.hasMoreElements()){
                 break; //next configuration
             }
-            System.out.println("Call!");
 
             //Create a pull for this configuration
             OrientDbRepository repo  = new OrientDbRepository(conf);
@@ -174,7 +173,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         //TODO very dummy fix that
         //removedBundle(bundle,bundleEvent,repositories);
         //addingBundle(bundle,bundleEvent);
-        System.out.println("MODIFIED!");
     }
 
     @Override
