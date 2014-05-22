@@ -132,7 +132,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
                 if(appConf.isProd()){
                     throw e;
                 }
-
                 //Create the database if in test or dev. mode
                 db = new OObjectDatabaseTx(conf.getUrl()).create();
                 //Add the user as admin to the newly created db.

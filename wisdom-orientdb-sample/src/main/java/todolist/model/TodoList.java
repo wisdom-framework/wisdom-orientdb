@@ -30,10 +30,6 @@ public class TodoList {
     @OneToMany(orphanRemoval = true)
     private List<Todo> todos = new ArrayList<>();
 
-    public void addTodo(Todo todo){
-        todos.add(todo);
-    }
-
     public String getName() {
         return name;
     }

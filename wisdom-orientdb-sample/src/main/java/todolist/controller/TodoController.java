@@ -6,6 +6,8 @@
 package todolist.controller;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import javassist.util.proxy.Proxy;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.wisdom.api.DefaultController;
 import org.wisdom.api.annotations.*;
@@ -29,8 +31,14 @@ public class TodoController extends DefaultController{
     @Model(value = TodoList.class)
     private Crud<TodoList,String> listCrud;
 
+    @Model(value = Todo.class)
+    private Crud<Todo,String> todoCrud;
+
+
     @Validate
     private void start(){
+        Class klass = Proxy.class;
+        //Populate the db with some default value
         if(!listCrud.findAll().iterator().hasNext()){
             Todo todo = new Todo();
             todo.setContent("Check out this awesome todo demo!");
@@ -38,15 +46,15 @@ public class TodoController extends DefaultController{
 
 
             TodoList list = new TodoList();
-            list.setName("Home");
-            list.addTodo(todo);
+            list.setName("Todo-List");
+            list.setTodos(Lists.newArrayList(todo));
             listCrud.save(list);
         }
     }
 
     @Route(method = GET,uri = "/")
     public Result getList(){
-        return ok(Iterables.toArray(listCrud.findAll(), TodoList.class)).json();
+        return ok(Iterables.toArray(listCrud.findAll(),TodoList.class)).json();
     }
 
     @Route(method = PUT, uri = "/")
@@ -69,8 +77,13 @@ public class TodoController extends DefaultController{
 
     @Route(method = GET,uri = "/{id}")
     public Result getTodos(final @Parameter("id") String id){
-        TodoList todoList = listCrud.findOne(id);
+        TodoList todoList = null;
 
+        try{
+            todoList = listCrud.findOne(id);
+        }catch (IllegalArgumentException e){
+            return badRequest();
+        }
         if(todoList == null){
             return notFound();
         }
@@ -86,10 +99,30 @@ public class TodoController extends DefaultController{
             return notFound();
         }
 
-        todoList.addTodo(todo);
-        todoList = listCrud.save(todoList);
+        todoList.getTodos().add(todo);
+        todoList=listCrud.save(todoList);
+        return ok(Iterables.getLast(todoList.getTodos())).json();
+    }
 
-        return ok(todoList.getTodos().get(todoList.getTodos().size())).json();
+    @Route(method = PUT,uri = "/{id}/{todoId}")
+    public Result updateTodo(@Parameter("id") String listId,@Parameter("todoId") String todoId,@Body Todo todo){
+        TodoList todoList = listCrud.findOne(listId);
+
+        if(todoList == null){
+            return notFound();
+        }
+
+        if(!todoId.equals(todo.getId())){
+            return badRequest("The id of the todo does not match the url one");
+        }
+
+        Iterator<Todo> itTodo = todoList.getTodos().iterator();
+        while(itTodo.hasNext()){
+            if(itTodo.next().getId().equals(todoId)){
+                return ok(todoCrud.save(todo)).json();
+            }
+        }
+        return notFound();
     }
 
     @Route(method = DELETE,uri = "/{id}/{todoId}")

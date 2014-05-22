@@ -1,4 +1,0 @@
-Private-Package: todolist.controller, todolist.model
-Import-Package: javassist.util.proxy, \
-    javax.persistence;version="[0,2)", \
-    *

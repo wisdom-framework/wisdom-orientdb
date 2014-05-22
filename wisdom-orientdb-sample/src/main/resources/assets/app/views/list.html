@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col-md-4 col-md-push-4">
+        <h1 class="text-center">{{name}}</h1>
+        <hr/>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-4 col-lg-push-4 text-center" id="newTodo">
+        <textarea class="content "on-enter="newTodo" placeholder="Enter TODO" autofocus></textarea>
+    </div>
+</div>
+
+{{#todos:index}}
+
+<div class="row">
+    <div class="col-md-4 col-md-push-4 text-center" id="todos">
+        <form class="form-inline" role="form">
+            <div class="checkbox">
+                <input type='checkbox' checked='{{done}}' on-click='updateTodo'>
+            </div>
+            <textarea rows="1" class="form-control content" id="{{id}}" on-enter="updateTodo">{{content}}</textarea>
+            <button type="button" class="btn btn-danger btn-sm" on-click='delTodo:{{index}}'>x</button>
+        </form>
+    </div>
+</div>
+
+{{/todos}}
