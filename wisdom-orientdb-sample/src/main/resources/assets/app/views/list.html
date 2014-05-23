@@ -10,7 +10,7 @@
 <div class="row">
     <div class="col-md-4 col-md-push-4" id="newTodo">
         <form class="form-inline" role="form">
-            <textarea class="form-control content" on-enter="newTodo" placeholder="Press Enter to add a TODO" autofocus></textarea>
+            <textarea class="form-control content" on-enter="newTodo" placeholder="Press Enter to add a TODO" autofocus/>
         </form>
     </div>
 </div>
@@ -23,7 +23,7 @@
             <div class="checkbox">
                 <input type='checkbox' checked='{{done}}' on-click='updateTodo'>
             </div>
-            <textarea rows="1" class="form-control content {{done ? 'done' : ''}}" id="{{id}}" on-enter="updateTodo">{{content}}</textarea>
+            <textarea rows="1" class="form-control content {{done ? 'done' : ''}}" id="{{id}}" on-enter="updateTodo" value="{{content}}"/>
             <button type="button" class="btn btn-danger btn-sm" on-click="delTodo:{{index}}">
                 <span class="glyphicon glyphicon-trash"></span>
             </button>
