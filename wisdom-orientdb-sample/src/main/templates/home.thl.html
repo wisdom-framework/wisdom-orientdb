@@ -1,9 +1,9 @@
 <!--
   #%L
   Wisdom-Framework
-  %%
+  %
   Copyright (C) 2013 - 2014 Wisdom Framework
-  %%
+  %
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
   You may obtain a copy of the License at
@@ -19,32 +19,39 @@
   -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Wisdom - OrientDB - TodoList sample</title>
-    <meta charset="UTF-8" http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link href="/libs/css/bootstrap.min.css" rel="stylesheet"/>
+    <meta charset="UTF-8" http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/libs/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
-        #newTodo {
-            margin-bottom: 10px;
-        }
-
-        .content{
-            width: 100%;
-            min-width: 400px;
-        }
-
-        #todos {
-            margin-bottom: 5px;
-        }
-
+      #newTodo {
+          margin-bottom: 10px;
+          margin-left: 29px;
+      }
+      .content {
+          width: 85%;
+          min-width: 400px;
+      }
+      .done {
+          text-decoration: line-through;
+      }
+      input[type=checkbox] {
+        height: 25px;
+        width: 25px;
+      }
+      #todos {
+        margin-top: 5px;
+      }
     </style>
 
 </head>
+
 <body>
 
-    <div class='container-fluid' id="listContainer">
+    <div class='container-fuild' id="listContainer">
         Loading Todo lists....
     </div>
 
@@ -57,27 +64,27 @@
     <script src="/assets/app/render/comp/RactiveRender.js"></script>
     <script src="/assets/app/TodoListController.js"></script>
     <script>
-        var listModel = {};
+    var listModel = {};
 
-        //Start the app!
-        jQuery(document).ready(function () {
+    //Start the app!
+    jQuery(document).ready(function() {
 
-        $.ajax( '/assets/app/views/list.html' ).then( function ( listTemplate ) {
+        $.ajax('/assets/app/views/list.html').then(function(listTemplate) {
 
-           hub.registerComponent(new RactiveRender(),{
+            hub.registerComponent(new RactiveRender(), {
                 model: listModel,
-                template : listTemplate,
-                container : 'listContainer',
-                name : 'TodoListRender'
-           }).registerComponent(new TodoListController(),{
+                template: listTemplate,
+                container: 'listContainer',
+                name: 'TodoListRender'
+            }).registerComponent(new TodoListController(), {
                 model: listModel,
-                name : 'TodoListController'
-           }).start();
-         });
-
-
+                name: 'TodoListController'
+            }).start();
         });
+
+
+    });
     </script>
 </body>
-</html>
 
+</html>
