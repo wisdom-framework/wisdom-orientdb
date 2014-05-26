@@ -6,12 +6,13 @@
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.id.ORecordId;
+import com.orientechnologies.orient.core.query.OQuery;
 import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
-import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.api.model.Repository;
+import org.wisdom.orientdb.object.OrientDbCrud;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ import java.util.concurrent.Callable;
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
-public class OrientDbCrudService<T> implements Crud<T, String> {
+public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private OObjectDatabaseTx db;
 
     private final OrientDbRepository repo;
@@ -224,6 +225,47 @@ public class OrientDbCrudService<T> implements Crud<T, String> {
         }
         return entities;
     }
+
+    @Override
+    public List<T> query(OQuery<T> command, Object ... args){
+        acquire();
+        try {
+            return db.query(command,args);
+        }finally {
+            release();
+        }
+    }
+
+    @Override
+    public T load(T pojo) {
+        acquire();
+        try {
+            return db.load(pojo);
+        }finally {
+            release();
+        }
+    }
+
+    @Override
+    public T load(T pojo, String fetchPlan) {
+        acquire();
+        try {
+            return db.load(pojo,fetchPlan);
+        }finally {
+            release();
+        }
+    }
+
+    @Override
+    public T detach(T pojo, Boolean returnNonProxyInstance) {
+        acquire();
+        try {
+            return db.detach(pojo,returnNonProxyInstance);
+        }finally {
+            release();
+        }
+    }
+
 
     @Override
     public long count() {

@@ -8,6 +8,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.conf.WOrientConf;
+import org.wisdom.orientdb.object.OrientDbCrud;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,7 +23,7 @@ public class OrientDbRepository implements Repository<OObjectDatabasePool>{
 
     private Collection<ServiceRegistration> registrations = new ArrayList<>();
 
-    private Collection<Crud<?,?>> crudServices = new ArrayList<>();
+    private Collection<OrientDbCrud<?,?>> crudServices = new ArrayList<>();
 
     public OrientDbRepository(WOrientConf conf){
         this.server = new OObjectDatabasePool(conf.getUrl(),conf.getUser(),conf.getPass());
@@ -42,11 +43,11 @@ public class OrientDbRepository implements Repository<OObjectDatabasePool>{
     }
 
     protected void registerAllCrud(BundleContext context){
-        for(Crud crud: crudServices){
+        for(OrientDbCrud crud: crudServices){
             Dictionary prop = conf.toDico();
             prop.put(Crud.ENTITY_CLASS_PROPERTY,crud.getEntityClass());
             prop.put(Crud.ENTITY_CLASSNAME_PROPERTY,crud.getEntityClass().getName());
-            registrations.add(context.registerService(Crud.class,crud,prop));
+            registrations.add(context.registerService(new String[]{Crud.class.getName(),OrientDbCrud.class.getName()},crud,prop));
         }
     }
 
@@ -69,14 +70,13 @@ public class OrientDbRepository implements Repository<OObjectDatabasePool>{
 
     @Override
     public Collection<Crud<?, ?>> getCrudServices() {
-        return crudServices;
+        return (Collection) crudServices;
     }
 
     @Override
     public String getName() {
         return server.getName();
     }
-
 
     @Override
     public String getType() {

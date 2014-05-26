@@ -20,6 +20,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
@@ -52,6 +54,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     @Requires
     private JacksonModuleRepository moduleRepository;
 
+    private Logger logger = LoggerFactory.getLogger(OrientDbCrudProvider.class);
+
     private static final SimpleModule module = new SimpleModule("Orientdb Ignore Proxy");
 
     static {
@@ -77,6 +81,12 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
+        confs = WOrientConf.createFromApplicationConf(appConf);
+
+        if(confs.isEmpty()){
+            return;
+        }
+
         //Ignore javaassit injected handler created by Orientdb for json serialization
         moduleRepository.register(module);
 
@@ -85,16 +95,17 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
         //remove the hook since we handle shutdown in the stop callback
         Orient.instance().removeShutdownHook();
-        confs = WOrientConf.createFromApplicationConf(appConf);
 
-        if(!confs.isEmpty()){
-            bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
-            bundleTracker.open();
-        }
+        bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
+        bundleTracker.open();
     }
 
     @Invalidate
     private void stop(){
+        if(confs.isEmpty()){
+            return;
+        }
+
         if(bundleTracker != null){
             bundleTracker.close();
         }
@@ -107,10 +118,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Override
     public Collection<OrientDbRepository> addingBundle(Bundle bundle, BundleEvent bundleEvent) {
-        if(confs.isEmpty()){
-            return null;
-        }
-
         Collection<OrientDbRepository> repos = new HashSet<>();
 
         for(WOrientConf conf: confs){
@@ -132,6 +139,9 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
                 if(appConf.isProd()){
                     throw e;
                 }
+
+                logger.debug("Cannot access to orientdb database "+ conf.getAlias()+" ; creating new database at url: " +conf.getUrl(),e);
+
                 //Create the database if in test or dev. mode
                 db = new OObjectDatabaseTx(conf.getUrl()).create();
                 //Add the user as admin to the newly created db.
@@ -153,6 +163,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
                 }
             }while (enums.hasMoreElements());
 
+
+            logger.debug("Crud service has been added for "+conf.getNameSpace()+" in "+conf.getAlias() +" orientdb.");
 
             //register all crud service available in this repo
             repo.registerAllCrud(context);
