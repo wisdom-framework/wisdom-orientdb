@@ -12,7 +12,7 @@ import org.apache.felix.ipojo.annotations.Validate;
 import org.wisdom.api.DefaultController;
 import org.wisdom.api.annotations.*;
 import org.wisdom.api.http.Result;
-import org.wisdom.api.model.Crud;
+import org.wisdom.orientdb.object.OrientDbCrud;
 import todolist.model.Todo;
 import todolist.model.TodoList;
 
@@ -29,10 +29,10 @@ import static org.wisdom.api.http.HttpMethod.*;
 @Path("/list")
 public class TodoController extends DefaultController{
     @Model(value = TodoList.class)
-    private Crud<TodoList,String> listCrud;
+    private OrientDbCrud<TodoList,String> listCrud;
 
     @Model(value = Todo.class)
-    private Crud<Todo,String> todoCrud;
+    private OrientDbCrud<Todo,String> todoCrud;
 
 
     @Validate
@@ -111,6 +111,8 @@ public class TodoController extends DefaultController{
         if(todoList == null){
             return notFound();
         }
+
+        System.out.println(String.valueOf(todo));
 
         if(!todoId.equals(todo.getId())){
             return badRequest("The id of the todo does not match the url one");

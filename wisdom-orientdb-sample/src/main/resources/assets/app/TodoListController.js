@@ -101,7 +101,13 @@ function TodoListController() {
         });
     }
 
+    function notDone(todos){
+      return todos.reduce(function(prev,curr){return prev + !curr.done;},0);
+    }
+
     self.start = function() {
+      _model.notDone = notDone;
+
         $.ajax(_url).then(function(todolist) {
             if (todolist.length > 0) {
                 _model.name = todolist[0].name;

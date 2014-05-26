@@ -29,21 +29,47 @@
     <style>
       #newTodo {
           margin-bottom: 10px;
-          margin-left: 29px;
       }
-      .content {
-          width: 85%;
-          min-width: 400px;
+      #newTodo > textarea{
+        width: 100%;
+        border: 1px solid #ddd;
+        -webkit-border-radius: 5px;
+        -moz-border-radius: 5px;
+        border-radius: 5px;
       }
       .done {
           text-decoration: line-through;
       }
-      input[type=checkbox] {
-        height: 25px;
-        width: 25px;
-      }
-      #todos {
+
+      .todos > ul{
         margin-top: 5px;
+        margin-right: 8px;
+        border-left: 1px solid #eee;
+        border-right: 1px solid #eee;
+      }
+
+      .li-todos{
+        width: 100%;
+        padding-left: 0.5em;
+        display: inline-block;
+      }
+      .li-todos:hover{
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+      }
+      .li-todos > button{
+        margin-top: 0.33em;
+        margin-right: 0.5em;
+      }
+      .li-todos > textarea{
+        background-color: inherit;
+        border: 0px;
+        width: 80%;
+        resize: none;
+      }
+      .li-todos > input[type=checkbox] {
+        height: 23px;
+        width: 23px;
       }
     </style>
 

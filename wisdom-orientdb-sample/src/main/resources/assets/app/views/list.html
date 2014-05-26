@@ -1,34 +1,33 @@
-
 <div class="row">
     <div class="col-md-4 col-md-push-4">
-        <h1 class="text-center">{{name}}</h1>
+        <div class="page-header">
+            <h1 class="text-center">{{name}}
+                <span class="badge">{{notDone(todos)}}</span>
+            </h1>
+        </div>
     </div>
 </div>
-
-<hr>
 
 <div class="row">
     <div class="col-md-4 col-md-push-4" id="newTodo">
-        <form class="form-inline" role="form">
-            <textarea class="form-control content" on-enter="newTodo" placeholder="Press Enter to add a TODO" autofocus/>
-        </form>
+        <textarea on-enter="newTodo" placeholder="Press Enter to add a TODO" autofocus/>
     </div>
 </div>
 
-{{#todos:index}}
+<div class="row>">
 
-<div class="row">
-    <div class="col-md-4 col-md-push-4" id="todos">
-        <form class="form-inline" role="form">
-            <div class="checkbox">
+    <div class="col-md-4 col-md-push-4 todos">
+        <ul class="list-unstyled">
+            {{#todos:index}}
+            <li class="li-todos">
                 <input type='checkbox' checked='{{done}}' on-click='updateTodo'>
-            </div>
-            <textarea rows="1" class="form-control content {{done ? 'done' : ''}}" id="{{id}}" on-enter="updateTodo" value="{{content}}"/>
-            <button type="button" class="btn btn-danger btn-sm" on-click="delTodo:{{index}}">
-                <span class="glyphicon glyphicon-trash"></span>
-            </button>
-        </form>
+                <textarea rows="1" class="{{done ? 'done' : ''}}" id="{{id}}" on-enter="updateTodo" value="{{content}}" />
+                <button type="button" class="btn btn-danger btn-xs pull-right" on-click="delTodo:{{index}}">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+            </li>
+            {{/todos}}
+        </ul>
     </div>
-</div>
 
-{{/todos}}
+</div>
