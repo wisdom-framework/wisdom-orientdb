@@ -69,7 +69,7 @@ function TodoListController() {
 
         $.ajax({
             type: "PUT",
-            contentType: "application/json",
+            contentType: "application/json; charset=UTF-8",
             url: _model.url,
             data: JSON.stringify(newtodo)
         }).done(function(data) {
@@ -81,11 +81,11 @@ function TodoListController() {
         var todo = event.context;
 
         $.ajax({
-            type: "PUT",
-            contentType: "application/json",
+            type: "POST",
+            contentType: "application/json; charset=UTF-8",
             url: encodeIdURL(_model.url+"/",todo.id),
             data: JSON.stringify(todo)
-        }).done(function(data) {
+        }).done(function() {
             //TODO notification
         });
     }
@@ -96,11 +96,14 @@ function TodoListController() {
         $.ajax({
             type: "DELETE",
             url: encodeIdURL(_model.url+"/",todo.id)
-        }).done(function(data) {
+        }).done(function() {
             _model.todos.splice(index, 1);
         });
     }
 
+    /**
+     * @return the number of todos not yet done present in the list model.
+     */
     function notDone(todos){
       return todos.reduce(function(prev,curr){return prev + !curr.done;},0);
     }

@@ -16,6 +16,7 @@ import org.wisdom.orientdb.object.OrientDbCrud;
 import todolist.model.Todo;
 import todolist.model.TodoList;
 
+import javax.validation.Valid;
 import java.util.Iterator;
 
 import static org.wisdom.api.http.HttpMethod.*;
@@ -92,11 +93,15 @@ public class TodoController extends DefaultController{
     }
 
     @Route(method = PUT,uri = "/{id}")
-    public Result createTodo(final @Parameter("id") String id,@Body Todo todo){
+    public Result createTodo(final @Parameter("id") String id,@Valid @Body Todo todo){
         TodoList todoList = listCrud.findOne(id);
 
         if(todoList == null){
             return notFound();
+        }
+
+        if(todo == null){
+            return badRequest("Cannot create todo, content is null.");
         }
 
         todoList.getTodos().add(todo);
@@ -104,15 +109,19 @@ public class TodoController extends DefaultController{
         return ok(Iterables.getLast(todoList.getTodos())).json();
     }
 
-    @Route(method = PUT,uri = "/{id}/{todoId}")
-    public Result updateTodo(@Parameter("id") String listId,@Parameter("todoId") String todoId,@Body Todo todo){
+    @Route(method = POST,uri = "/{id}/{todoId}")
+    public Result updateTodo(@Parameter("id") String listId,@Parameter("todoId") String todoId,@Valid @Body Todo todo){
         TodoList todoList = listCrud.findOne(listId);
 
         if(todoList == null){
             return notFound();
         }
 
-        System.out.println(String.valueOf(todo));
+        //TODO sometimes body is null her
+
+        if(todo == null){
+            return badRequest("The given todo is null");
+        }
 
         if(!todoId.equals(todo.getId())){
             return badRequest("The id of the todo does not match the url one");

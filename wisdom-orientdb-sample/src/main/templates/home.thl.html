@@ -68,6 +68,7 @@
         resize: none;
       }
       .li-todos > input[type=checkbox] {
+        -moz-appearance: none;
         height: 23px;
         width: 23px;
       }
@@ -88,27 +89,28 @@
     <script src="/assets/app/render/RenderService.js"></script>
     <script src="/assets/app/render/RactiveRenderService.js"></script>
     <script src="/assets/app/render/comp/RactiveRender.js"></script>
+
+    <!-- Views -->
+    <script src="/assets/app/views/list.js"></script>
+
+    <!-- Controllers -->
     <script src="/assets/app/TodoListController.js"></script>
+
+    <!-- App -->
     <script>
     var listModel = {};
 
     //Start the app!
     jQuery(document).ready(function() {
-
-        $.ajax('/assets/app/views/list.html').then(function(listTemplate) {
-
             hub.registerComponent(new RactiveRender(), {
                 model: listModel,
-                template: listTemplate,
+                template: "list",
                 container: 'listContainer',
                 name: 'TodoListRender'
             }).registerComponent(new TodoListController(), {
                 model: listModel,
                 name: 'TodoListController'
             }).start();
-        });
-
-
     });
     </script>
 </body>
