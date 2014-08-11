@@ -1,0 +1,24 @@
+{
+    "name": "wisdom-orientdb",
+    "version":"1.0-SNAPSHOT",
+    "description": "Wisdom OrientDB integration.",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/wisdom-framework/wisdom-orientdb"
+    },
+
+    "author": "The Wisdom Team",
+    "license": {
+            "type": "Apache",
+            "url": "https://github.com/wisdom-framework/wisdom-orientdb/blob/master/LICENSE"
+        },
+    "homepage": "https://github.com/wisdom-framework/wisdom-orientdb",
+    "keywords": [
+        "orientdb",
+        "db",
+        "nosql",
+        "graphdb",
+        "document-orienteddb"
+    ]
+}
+
