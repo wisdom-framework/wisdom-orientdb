@@ -125,8 +125,11 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             Enumeration<URL> enums = bundle.findEntries(packageNameToPath(conf.getNameSpace()), "*.class", true);
 
             if(enums== null || !enums.hasMoreElements()){
-                break; //next configuration
+                continue; //next configuration
             }
+
+            logger.info("OrientDB Database configuration found for {} : {}",
+                    packageNameToPath(conf.getNameSpace()), conf.toDico());
 
             //Create a pull for this configuration
             OrientDbRepository repo  = new OrientDbRepository(conf);
