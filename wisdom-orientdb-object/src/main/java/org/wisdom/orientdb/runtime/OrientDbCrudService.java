@@ -1,8 +1,3 @@
-/*
- * Copyright 2014, Technologic Arts Vietnam.
- * All right reserved.
- */
-
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.id.ORecordId;
@@ -29,7 +24,7 @@ import java.util.concurrent.Callable;
 public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private OObjectDatabaseTx db;
 
-    private final OrientDbRepository repo;
+    private final OrientDbRepositoryImpl repo;
 
     private final Class<T> entityClass;
 
@@ -51,7 +46,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         }
     };
 
-    protected OrientDbCrudService(OrientDbRepository repo, Class<T> entityClass) {
+    protected OrientDbCrudService(OrientDbRepositoryImpl repo, Class<T> entityClass) {
         txtype = OTransaction.TXTYPE.OPTIMISTIC;
         this.repo = repo;
         pool = repo.get();

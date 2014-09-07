@@ -1,12 +1,6 @@
-/*
- * Copyright 2014, Technologic Arts Vietnam.
- * All right reserved.
- */
-
 package org.wisdom.orientdb.runtime;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -37,8 +31,6 @@ import static java.io.File.separator;
 /**
  * created: 5/13/14.
  *
- * TODO user logger
- *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
 @Component(name = OrientDbCrudProvider.COMPONENT_NAME)
@@ -61,7 +53,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     static {
         module.addSerializer(OObjectProxyMethodHandler.class, new JsonSerializer<OObjectProxyMethodHandler>() {
             @Override
-            public void serialize(OObjectProxyMethodHandler oObjectProxyMethodHandler, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException, JsonProcessingException {
+            public void serialize(OObjectProxyMethodHandler oObjectProxyMethodHandler, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
                 jsonGenerator.writeStartObject();
                 jsonGenerator.writeStartObject();
             }
@@ -124,7 +116,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
             Enumeration<URL> enums = bundle.findEntries(packageNameToPath(conf.getNameSpace()), "*.class", true);
 
-            if(enums== null || !enums.hasMoreElements()){
+            if(enums == null || !enums.hasMoreElements()){
                 continue; //next configuration
             }
 
@@ -143,12 +135,13 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
                     throw e;
                 }
 
-                logger.debug("Cannot access to orientdb database "+ conf.getAlias()+" ; creating new database at url: " +conf.getUrl(),e);
+                logger.debug("Cannot access to orientdb database {}; creating new database at url: {}",
+                        conf.getAlias(),conf.getUrl(),e);
 
                 //Create the database if in test or dev. mode
                 db = new OObjectDatabaseTx(conf.getUrl()).create();
                 //Add the user as admin to the newly created db.
-                db.getMetadata().getSecurity().createUser(conf.getUser(), conf.getPass(), new String[]{ORole.ADMIN});
+                db.getMetadata().getSecurity().createUser(conf.getUser(), conf.getPass(), ORole.ADMIN);
             }
 
 
@@ -167,7 +160,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             }while (enums.hasMoreElements());
 
 
-            logger.debug("Crud service has been added for "+conf.getNameSpace()+" in "+conf.getAlias() +" orientdb.");
+            logger.debug("Crud service has been added for {} in {} OrientDb.",conf.getNameSpace(),conf.getAlias());
 
             //register all crud service available in this repo
             repo.registerAllCrud(context);
