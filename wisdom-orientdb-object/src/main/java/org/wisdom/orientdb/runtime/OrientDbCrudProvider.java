@@ -43,7 +43,7 @@ import static java.io.File.separator;
  */
 @Component(name = OrientDbCrudProvider.COMPONENT_NAME)
 @Instantiate(name = OrientDbCrudProvider.INSTANCE_NAME)
-public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<OrientDbRepository>> {
+public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<OrientDbRepositoryImpl>> {
     public static final String COMPONENT_NAME = "wisdom:orientdb:crudservice:factory";
     public static final String INSTANCE_NAME = "wisdom:orientdb:crudservice:provider";
 
@@ -71,7 +71,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     private final BundleContext context;
 
-    private BundleTracker<Collection<OrientDbRepository>> bundleTracker;
+    private BundleTracker<Collection<OrientDbRepositoryImpl>> bundleTracker;
 
     private Collection<WOrientConf> confs;
 
@@ -117,8 +117,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
 
     @Override
-    public Collection<OrientDbRepository> addingBundle(Bundle bundle, BundleEvent bundleEvent) {
-        Collection<OrientDbRepository> repos = new HashSet<>();
+    public Collection<OrientDbRepositoryImpl> addingBundle(Bundle bundle, BundleEvent bundleEvent) {
+        Collection<OrientDbRepositoryImpl> repos = new HashSet<>();
 
         for(WOrientConf conf: confs){
 
@@ -132,7 +132,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
                     packageNameToPath(conf.getNameSpace()), conf.toDico());
 
             //Create a pull for this configuration
-            OrientDbRepository repo  = new OrientDbRepository(conf);
+            OrientDbRepositoryImpl repo  = new OrientDbRepositoryImpl(conf);
             OObjectDatabaseTx db;
 
             //Get the connection from the pool
@@ -183,15 +183,15 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepository> repositories) {
+    public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepositoryImpl> repositories) {
         //TODO very dummy fix that
         //removedBundle(bundle,bundleEvent,repositories);
         //addingBundle(bundle,bundleEvent);
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepository> repositories) {
-        for(OrientDbRepository repo: repositories){
+    public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepositoryImpl> repositories) {
+        for(OrientDbRepositoryImpl repo: repositories){
             repo.destroy();
         }
     }

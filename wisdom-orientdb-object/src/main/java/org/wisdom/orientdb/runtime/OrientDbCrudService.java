@@ -13,6 +13,7 @@ import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.object.OrientDbCrud;
+import org.wisdom.orientdb.object.OrientDbRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -273,7 +274,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     }
 
     @Override
-    public Repository getRepository() {
+    public OrientDbRepository getRepository() {
         return repo;
     }
 

@@ -4,7 +4,7 @@ import org.wisdom.api.configuration.Configuration;
 
 import java.util.*;
 
-public class WOrientConf {
+public final class WOrientConf {
     public static final String ORIENTDB_PREFIX = "orientdb";
     public static final String ORIENTDB_URL = "url";
     public static final String ORIENTDB_USER = "user";

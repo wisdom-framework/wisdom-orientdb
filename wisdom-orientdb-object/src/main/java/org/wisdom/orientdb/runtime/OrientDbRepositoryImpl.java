@@ -6,18 +6,18 @@ import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.wisdom.api.model.Crud;
-import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.object.OrientDbCrud;
+import org.wisdom.orientdb.object.OrientDbRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Dictionary;
 
 /**
- * Created by barjo on 5/10/14.
+ * Implementation of the OrientDbRepository.
  */
-public class OrientDbRepository implements Repository<OObjectDatabasePool>{
+public class OrientDbRepositoryImpl implements OrientDbRepository {
     private final OObjectDatabasePool server;
     private final WOrientConf conf;
 
@@ -25,7 +25,7 @@ public class OrientDbRepository implements Repository<OObjectDatabasePool>{
 
     private Collection<OrientDbCrud<?,?>> crudServices = new ArrayList<>();
 
-    public OrientDbRepository(WOrientConf conf){
+    public OrientDbRepositoryImpl(WOrientConf conf){
         this.server = new OObjectDatabasePool(conf.getUrl(),conf.getUser(),conf.getPass());
         this.conf = conf;
     }

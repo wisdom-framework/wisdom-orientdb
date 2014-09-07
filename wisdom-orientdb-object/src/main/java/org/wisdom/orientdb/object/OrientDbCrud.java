@@ -3,6 +3,7 @@ package org.wisdom.orientdb.object;
 
 import com.orientechnologies.orient.core.query.OQuery;
 import org.wisdom.api.model.Crud;
+import org.wisdom.api.model.Repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -37,4 +38,9 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
     T load(T object, String fetchPlan);
 
     T detach(T object,Boolean returnNonProxyInstance);
+
+    /**
+     * @return This OrientDbCrud service associated repository,
+     */
+    OrientDbRepository getRepository();
 }

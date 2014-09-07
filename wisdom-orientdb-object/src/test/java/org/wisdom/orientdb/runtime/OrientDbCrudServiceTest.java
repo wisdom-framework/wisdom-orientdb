@@ -41,7 +41,7 @@ public class OrientDbCrudServiceTest {
         WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model");
         db.getEntityManager().registerEntityClass(Hello.class);
 
-        crud = new OrientDbCrudService<Hello>(new OrientDbRepository(conf),Hello.class);
+        crud = new OrientDbCrudService<Hello>(new OrientDbRepositoryImpl(conf),Hello.class);
     }
 
     @AfterClass
