@@ -6,7 +6,6 @@ import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.EntityFilter;
-import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.object.OrientDbCrud;
 import org.wisdom.orientdb.object.OrientDbRepository;
 
@@ -60,6 +59,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private void acquire() {
         if (db == null || db.isClosed()) {
             db = pool.acquire();
+            //get lazy loading fetching from the conf.
+            db.setLazyLoading(repo.getConf().getAutolazyloading());
         }
     }
 

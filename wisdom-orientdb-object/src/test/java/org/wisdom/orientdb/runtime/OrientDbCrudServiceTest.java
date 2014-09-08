@@ -38,7 +38,7 @@ public class OrientDbCrudServiceTest {
         db = new OObjectDatabaseTx(url).create();
         OSecurity sm = db.getMetadata().getSecurity();
         OUser user = sm.createUser("test", "test", new String[]{"admin"});
-        WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model");
+        WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true);
         db.getEntityManager().registerEntityClass(Hello.class);
 
         crud = new OrientDbCrudService<Hello>(new OrientDbRepositoryImpl(conf),Hello.class);
@@ -120,5 +120,34 @@ public class OrientDbCrudServiceTest {
 
         assertThat(h).isNotNull();
         assertThat(h.getName()).matches("Bob[0-9]");
+    }
+
+    @Test
+    public void crudShouldNotUseLazyLoadingIfSetToFalse(){
+        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(false);
+        OObjectDatabaseTx current = ((OrientDbRepositoryImpl) crud.getRepository()).get().acquire();
+
+        //trigger OrientDbCrudService#acquire
+        Hello hello = new Hello();
+        hello.setName("Lazy");
+        Hello saved = crud.save(hello);
+
+        assertThat(current.isLazyLoading()).isFalse();
+
+        //reset lazy loading to true
+        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
+    }
+
+    @Test
+    public void crudShouldUseLazyLoadingIfSetToTrue(){
+        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
+        OObjectDatabaseTx current = ((OrientDbRepositoryImpl) crud.getRepository()).get().acquire();
+
+        //trigger OrientDbCrudService#acquire
+        Hello hello = new Hello();
+        hello.setName("Bob");
+        Hello saved = crud.save(hello);
+
+        assertThat(current.isLazyLoading()).isEqualTo(true);
     }
 }

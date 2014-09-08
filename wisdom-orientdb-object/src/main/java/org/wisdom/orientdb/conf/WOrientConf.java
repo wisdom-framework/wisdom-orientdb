@@ -10,20 +10,23 @@ public final class WOrientConf {
     public static final String ORIENTDB_USER = "user";
     public static final String ORIENTDB_PASS = "pass";
     public static final String ORIENTDB_PACKAGE = "package";
+    public static final String ORIENTDB_AUTOLAZYLOADGING = "autolazyloading";
 
     private final String alias;
     private final String url;
     private final String user;
     private final String pass;
     private final String nameSpace;
+    private Boolean autolazyloading;
 
 
-    public WOrientConf(String alias, String url, String user, String pass, String nameSpace) {
+    public WOrientConf(String alias, String url, String user, String pass, String nameSpace, Boolean autolazyloading) {
         this.alias = alias;
         this.url = url;
         this.user = user;
         this.pass = pass;
         this.nameSpace = nameSpace;
+        this.autolazyloading = autolazyloading;
     }
 
     private WOrientConf(String alias, Configuration config) {
@@ -32,7 +35,9 @@ public final class WOrientConf {
             config.getOrDie(ORIENTDB_URL),
             config.getOrDie(ORIENTDB_USER),
             config.getOrDie(ORIENTDB_PASS),
-            config.getOrDie(ORIENTDB_PACKAGE)
+            config.getOrDie(ORIENTDB_PACKAGE),
+
+            config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true)
         );
     }
 
@@ -56,12 +61,25 @@ public final class WOrientConf {
         return nameSpace;
     }
 
-    public Dictionary<String,String> toDico(){
-        Dictionary<String,String> dico = new Hashtable<>(3);
+    public Boolean getAutolazyloading() {
+        return autolazyloading;
+    }
+
+    public void setAutoLazyLoading(Boolean lazyloading){
+        if(lazyloading == null){
+            throw new NullPointerException(ORIENTDB_AUTOLAZYLOADGING+" cannot be null.");
+        }
+
+        this.autolazyloading = lazyloading;
+    }
+
+    public Dictionary<String,Object> toDico(){
+        Dictionary<String,Object> dico = new Hashtable<>(5);
         dico.put("name",alias);
-        dico.put("url",url);
-        dico.put("user",user);
-        dico.put("package",nameSpace);
+        dico.put(ORIENTDB_URL,url);
+        dico.put(ORIENTDB_USER,user);
+        dico.put(ORIENTDB_PACKAGE,nameSpace);
+        dico.put(ORIENTDB_AUTOLAZYLOADGING,autolazyloading);
         return dico;
     }
 
@@ -103,4 +121,14 @@ public final class WOrientConf {
         return subconfs;
     }
 
+    @Override
+    public String toString() {
+        return "WOrientConf{" +
+                "alias='" + alias + '\'' +
+                ", url='" + url + '\'' +
+                ", user='" + user + '\'' +
+                ", nameSpace='" + nameSpace + '\'' +
+                ", autolazyloading=" + autolazyloading +
+                '}';
+    }
 }

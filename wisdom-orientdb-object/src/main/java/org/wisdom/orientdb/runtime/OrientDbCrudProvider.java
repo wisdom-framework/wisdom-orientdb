@@ -121,7 +121,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             }
 
             logger.info("OrientDB Database configuration found for {} : {}",
-                    packageNameToPath(conf.getNameSpace()), conf.toDico());
+                    packageNameToPath(conf.getNameSpace()), conf.toString());
 
             //Create a pull for this configuration
             OrientDbRepositoryImpl repo  = new OrientDbRepositoryImpl(conf);
