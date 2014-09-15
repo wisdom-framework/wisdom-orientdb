@@ -34,6 +34,8 @@
     <artifactId>wisdom-orientdb-object</artifactId>
 
     <packaging>wisdom</packaging>
+    <name>wisdom-orientdb-object</name>
+    <description>Implementation of a wisdom framework Crud services based on the orientdb object database.</description>
 
     <dependencies>
         <dependency>
