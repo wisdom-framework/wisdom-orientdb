@@ -32,7 +32,6 @@
     </parent>
 
     <artifactId>wisdom-orientdb-object</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <packaging>wisdom</packaging>
 
@@ -41,12 +40,10 @@
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.ipojo.annotations</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -62,28 +59,28 @@
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-object</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-client</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.iq80.snappy</groupId>
             <artifactId>snappy</artifactId>
             <version>0.3</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.0-api</artifactId>
@@ -94,7 +91,6 @@
         <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-test</artifactId>
-            <version>0.6.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -128,7 +124,7 @@
                 <!-- Define all the versions of the dependencies provided by Wisdom -->
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-bom</artifactId>
-                <version>0.6.3</version>
+                <version>${wisdom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -140,7 +136,7 @@
             <plugin>
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-maven-plugin</artifactId>
-                <version>0.6.3</version>
+                <version>${wisdom.version}</version>
                 <extensions>true</extensions>
             </plugin>
 

@@ -15,10 +15,45 @@
     <version>1.0-SNAPSHOT</version>
 
     <packaging>pom</packaging>
+    <name>wisdom-orientdb</name>
+    <description>Wisdom-Orientdb wisdom framework sub-project parent pom.</description>
+
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
 
     <properties>
         <orientdb.version>1.7.8</orientdb.version>
+        <wisdom.version>0.6.3</wisdom.version>
     </properties>
+
+    <scm>
+        <url>https://github.com/wisdom-framework/wisdom-orientdb</url>
+        <connection>scm:git:git@github.com:wisdom-framework/wisdom-orientdb.git</connection>
+        <developerConnection>scm:git:git@github.com:wisdom-framework/wisdom-orientdb.git</developerConnection>
+    </scm>
+
+    <inceptionYear>2014</inceptionYear>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/wisdom-framework/wisdom-orientdb/issues</url>
+    </issueManagement>
+
+    <organization>
+        <name>Wisdom Framework</name>
+        <url>http://wisdom-framework.org</url>
+    </organization>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencyManagement>
       <dependencies>
@@ -50,6 +85,19 @@
         </dependency>
 
         <dependency>
+            <groupId>org.wisdom-framework</groupId>
+            <artifactId>wisdom-api</artifactId>
+            <version>${wisdom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wisdom-framework</groupId>
+            <artifactId>wisdom-test</artifactId>
+            <version>${wisdom.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>3.18.0-GA</version>
@@ -57,10 +105,73 @@
       </dependencies>
     </dependencyManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.3</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <modules>
         <module>wisdom-orientdb-object</module>
     </modules>
-
 
     <repositories>
         <repository>
