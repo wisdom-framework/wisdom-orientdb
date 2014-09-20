@@ -26,7 +26,7 @@
     </licenses>
 
     <properties>
-        <orientdb.version>1.7.8</orientdb.version>
+        <orientdb.version>2.0-M1</orientdb.version>
         <wisdom.version>0.6.4</wisdom.version>
     </properties>
 
