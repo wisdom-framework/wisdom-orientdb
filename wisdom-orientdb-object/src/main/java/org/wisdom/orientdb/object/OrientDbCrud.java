@@ -3,7 +3,6 @@ package org.wisdom.orientdb.object;
 
 import com.orientechnologies.orient.core.query.OQuery;
 import org.wisdom.api.model.Crud;
-import org.wisdom.api.model.Repository;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,21 +22,66 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
      * {@link "http://github.com/orientechnologies/orientdb/wiki/SQL-Query"}
      *
      * example:
+     *  <code>
      *  List<T> result = crud.query(
      *  new OSQLSynchQuery<T>("select * from "+T.simpleName()+" where ID = 10 and name like 'G%'"));
+     *  </code>
      *
-     * @See com.orientechnologies.orient.object.db.OObjectDatabaseTx#query
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#query
      * @param command The Sql command to run
-     * @param args the arguments
+     * @param args The arguments
      * @return The result of the request as a list of entities.
      */
     List<T> query(OQuery<T> command, Object ... args);
 
-    T load(T object);
+    /**
+     * Load the given entity from the db and return it.
+     *
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object)
+     * @param entity The entity to load from the db.
+     * @return The attached version of the entity.
+     */
+    T load(T entity);
 
-    T load(T object, String fetchPlan);
+    /**
+     * Load the given entity from the db using the given fetchPlan and return it.
+     *
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object, String)
+     * @param entity The entity to load from the db.
+     * @param fetchPlan The fetchPlan used to retrieve the entity.
+     * @return The attached version of the entity
+     */
+    T load(T entity, String fetchPlan);
 
-    T detach(T object,Boolean returnNonProxyInstance);
+    /**
+     * Attached the given entity to the db. In this way all changes done within the object without using setters
+     * will be copied to the document.
+     *
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#attach(Object)
+     * @param entity The entity to be attached.
+     */
+    void attach(T entity);
+
+    /**
+     * Detached an entity from the database. All of the entity field can now be modified without impact on the db.
+     *
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object)
+     * @param attachedEntity The entity that needs to be detached
+     * @return A detached version of the entity (a proxy instance).
+     */
+    T detach(T attachedEntity);
+
+    /**
+     * Detached an entity from the database. All of the entity field can now be modified without impact on the db.
+     *
+     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object, boolean)
+     * @param attachedEntity The entity that needs to be detached
+     * @param returnNonProxyInstance <code>true</code> if you want the returned entity to be a plain object,
+     *                               and not a proxy.
+     * @return A detached version of the entity.
+     */
+    T detach(T attachedEntity,Boolean returnNonProxyInstance);
+
 
     /**
      * @return This OrientDbCrud service associated repository,

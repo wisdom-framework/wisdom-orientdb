@@ -234,30 +234,50 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     }
 
     @Override
-    public T load(T pojo) {
+    public T load(T entity) {
         acquire();
         try {
-            return db.load(pojo);
+            return db.load(entity);
         }finally {
             release();
         }
     }
 
     @Override
-    public T load(T pojo, String fetchPlan) {
+    public T load(T entity, String fetchPlan) {
         acquire();
         try {
-            return db.load(pojo,fetchPlan);
+            return db.load(entity,fetchPlan);
         }finally {
             release();
         }
     }
 
     @Override
-    public T detach(T pojo, Boolean returnNonProxyInstance) {
+    public void attach(T entity) {
         acquire();
         try {
-            return db.detach(pojo,returnNonProxyInstance);
+            db.attach(entity);
+        }finally {
+            release();
+        }
+    }
+
+    @Override
+    public T detach(T attachedEntity) {
+        acquire();
+        try {
+            return db.detach(attachedEntity);
+        }finally {
+            release();
+        }
+    }
+
+    @Override
+    public T detach(T entity, Boolean returnNonProxyInstance) {
+        acquire();
+        try {
+            return db.detach(entity,returnNonProxyInstance);
         }finally {
             release();
         }
