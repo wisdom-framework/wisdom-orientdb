@@ -29,6 +29,8 @@ import static org.wisdom.api.http.HttpMethod.*;
 @Controller
 @Path("/list")
 public class TodoController extends DefaultController{
+    static {Class workaround = Proxy.class;}
+
     @Model(value = TodoList.class)
     private OrientDbCrud<TodoList,String> listCrud;
 
@@ -38,7 +40,6 @@ public class TodoController extends DefaultController{
 
     @Validate
     private void start(){
-        Class klass = Proxy.class;
         //Populate the db with some default value
         if(!listCrud.findAll().iterator().hasNext()){
             Todo todo = new Todo();

@@ -27,12 +27,11 @@
     <parent>
         <groupId>org.wisdom-framework</groupId>
         <artifactId>wisdom-orientdb</artifactId>
-        <version>1.0-SNAPSHOT</version>
+        <version>0.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>wisdom-orientdb-sample</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <packaging>wisdom</packaging>
 
@@ -74,7 +73,6 @@
         <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-test</artifactId>
-            <version>0.6.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -100,18 +98,6 @@
             <version>1.7.6</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Additional applications -->
-        <dependency>
-            <groupId>org.wisdom-framework</groupId>
-            <artifactId>wisdom-monitor</artifactId>
-            <version>0.6.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.wisdom-framework</groupId>
-            <artifactId>documentation</artifactId>
-            <version>0.6.3</version>
-        </dependency>
     </dependencies>
 
     <dependencyManagement>
@@ -120,7 +106,7 @@
                 <!-- Define all the versions of the dependencies provided by Wisdom -->
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-bom</artifactId>
-                <version>0.6.3</version>
+                <version>${wisdom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -132,7 +118,7 @@
             <plugin>
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-maven-plugin</artifactId>
-                <version>0.6.3</version>
+                <version>${wisdom.version}</version>
                 <extensions>true</extensions>
             </plugin>
 
