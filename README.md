@@ -51,7 +51,7 @@ More information about the behavior of the OrientDB database is available on the
 
 ## Troubleshooting
 
-OrientDB uses javassist in order to create proxy for the entity object. This can cause the wisdom some problems if your projects does not have _javassist.util.proxy.Proxy_ in its classpath. A work around is to load this class in one of your component.
+OrientDB uses javassist in order to create proxy for the entity object. This can cause your project to experience some problems when being dynamicaly updated if it does not have _javassist.util.proxy.Proxy_ in its classpath. A work around is to load this class in one of your component.
 
 ```java
     import javassist.util.proxy.Proxy;
