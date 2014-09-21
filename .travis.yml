@@ -4,8 +4,9 @@ jdk:
 after_success:
 - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>"
   > ~/settings.xml
-- if [ -n ${TRAVIS_TAG} ]; then mvn deploy --settings ~/settings.xml; else mvn install; fi
+- if [ -z ${TRAVIS_TAG} ]; then mvn deploy --settings ~/settings.xml; fi
 before_deploy:
+- mvn package
 - zip -r ${TRAVIS_TAG}.zip wisdom-orientdb-object/target/*.jar
 deploy:
   provider: releases
@@ -15,3 +16,4 @@ deploy:
   on:
     tags: true
     all_branches: true
+
