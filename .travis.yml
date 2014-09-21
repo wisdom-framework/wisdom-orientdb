@@ -1,6 +1,17 @@
 language: java
 jdk:
-  - oraclejdk7
+- oraclejdk7
 after_success:
-  - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>" > ~/settings.xml
-  - mvn deploy --settings ~/settings.xml
+- echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>"
+  > ~/settings.xml
+- if [ -n ${TRAVIS_TAG} ]; then mvn deploy --settings ~/settings.xml; else mvn install; fi
+before_deploy:
+- zip -r ${TRAVIS_TAG}.zip wisdom-orientdb-object/target/*.jar
+deploy:
+  provider: releases
+  api_key:
+    secure: VtxbEzV3HCMoYcRQNG3uGZO+gXYFsWvlo9ioYRxoFDaLNUqpvT4WUW7oPmh53/fhVQyFS959BPgvZq0dNbBMmO7Etox3IpmjgEiYtWuPz4z1gjhuRFr6m3o/r8AB4zLGXOv6KGuG+MgowfISdivXq/mIXjDheTgj2ConPMS7HME=
+  file: ${TRAVIS_TAG}.zip
+  on:
+    tags: true
+    all_branches: true
