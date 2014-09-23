@@ -4,6 +4,8 @@ import org.wisdom.api.configuration.Configuration;
 
 import java.util.*;
 
+import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE;
+
 public final class WOrientConf {
     public static final String ORIENTDB_PREFIX = "orientdb";
     public static final String ORIENTDB_URL = "url";
@@ -11,6 +13,7 @@ public final class WOrientConf {
     public static final String ORIENTDB_PASS = "pass";
     public static final String ORIENTDB_PACKAGE = "package";
     public static final String ORIENTDB_AUTOLAZYLOADGING = "autolazyloading";
+    public static final String ORIENTDB_TXTYPE = "txtype";
 
     private final String alias;
     private final String url;
@@ -18,15 +21,19 @@ public final class WOrientConf {
     private final String pass;
     private final String nameSpace;
     private Boolean autolazyloading;
+    private TXTYPE txtype;
 
 
-    public WOrientConf(String alias, String url, String user, String pass, String nameSpace, Boolean autolazyloading) {
+    public WOrientConf(String alias, String url, String user, String pass, String nameSpace,
+                       Boolean autolazyloading, TXTYPE txtype) {
         this.alias = alias;
         this.url = url;
         this.user = user;
         this.pass = pass;
         this.nameSpace = nameSpace;
+
         this.autolazyloading = autolazyloading;
+        this.txtype = txtype;
     }
 
     private WOrientConf(String alias, Configuration config) {
@@ -37,7 +44,8 @@ public final class WOrientConf {
             config.getOrDie(ORIENTDB_PASS),
             config.getOrDie(ORIENTDB_PACKAGE),
 
-            config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true)
+            config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true),
+            config.get(ORIENTDB_TXTYPE, TXTYPE.class, TXTYPE.OPTIMISTIC)
         );
     }
 
@@ -61,6 +69,18 @@ public final class WOrientConf {
         return nameSpace;
     }
 
+    public TXTYPE getTxType() {
+        return  txtype;
+    }
+
+    public void setTxType(TXTYPE type) {
+        if(type == null){
+            throw new NullPointerException(ORIENTDB_TXTYPE+" cannot be null");
+        }
+
+        this.txtype = type;
+    }
+
     public Boolean getAutolazyloading() {
         return autolazyloading;
     }
@@ -80,6 +100,7 @@ public final class WOrientConf {
         dico.put(ORIENTDB_USER,user);
         dico.put(ORIENTDB_PACKAGE,nameSpace);
         dico.put(ORIENTDB_AUTOLAZYLOADGING,autolazyloading);
+        dico.put(ORIENTDB_TXTYPE,txtype);
         return dico;
     }
 
@@ -128,7 +149,8 @@ public final class WOrientConf {
                 ", url='" + url + '\'' +
                 ", user='" + user + '\'' +
                 ", nameSpace='" + nameSpace + '\'' +
-                ", autolazyloading=" + autolazyloading +
+                ", autolazyloading=" + autolazyloading + '\'' +
+                ", txtype=" + txtype +
                 '}';
     }
 }

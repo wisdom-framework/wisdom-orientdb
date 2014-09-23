@@ -2,7 +2,6 @@ package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.query.OQuery;
-import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.EntityFilter;
@@ -31,11 +30,6 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private final OObjectDatabasePool pool;
 
     /**
-     * Transaction type.
-     */
-    private final OTransaction.TXTYPE txtype;
-
-    /**
      * Flag used in order to know if the instance is used during a transaction in the current thread.
      */
     private static final ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>(){
@@ -46,7 +40,6 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     };
 
     protected OrientDbCrudService(OrientDbRepositoryImpl repo, Class<T> entityClass) {
-        txtype = OTransaction.TXTYPE.OPTIMISTIC;
         this.repo = repo;
         pool = repo.get();
         this.entityClass = entityClass;
@@ -298,13 +291,14 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     public void executeTransactionalBlock(Runnable runnable) {
         transaction.set(true);
         acquire();
-        db.begin(txtype);
+        db.begin(repo.getConf().getTxType());
 
         try {
             runnable.run();
             db.commit();
         } catch (Exception e) {
             db.rollback();
+            throw e;
         } finally {
             transaction.set(false);
             release();
@@ -315,7 +309,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     public <A> A executeTransactionalBlock(Callable<A> aCallable) {
         transaction.set(true);
         acquire();
-        db.begin(txtype);
+        db.begin(repo.getConf().getTxType());
         try {
             A result = aCallable.call();
             db.commit();

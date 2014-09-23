@@ -7,16 +7,19 @@ package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.metadata.security.OUser;
+import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
-import org.wisdom.api.model.Crud;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.model.Hello;
+import org.wisdom.orientdb.object.OrientDbCrud;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
+import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE.NOTX;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -26,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class OrientDbCrudServiceTest {
     private static OObjectDatabaseTx db;
-    private static Crud<Hello, String> crud;
+    private static OrientDbCrud<Hello, String> crud;
 
     public static TemporaryFolder folder = new TemporaryFolder();
 
@@ -38,7 +41,7 @@ public class OrientDbCrudServiceTest {
         db = new OObjectDatabaseTx(url).create();
         OSecurity sm = db.getMetadata().getSecurity();
         OUser user = sm.createUser("test", "test", new String[]{"admin"});
-        WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true);
+        WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true, NOTX);
         db.getEntityManager().registerEntityClass(Hello.class);
 
         crud = new OrientDbCrudService<Hello>(new OrientDbRepositoryImpl(conf),Hello.class);
@@ -149,5 +152,31 @@ public class OrientDbCrudServiceTest {
         Hello saved = crud.save(hello);
 
         assertThat(current.isLazyLoading()).isEqualTo(true);
+    }
+
+    @Test
+    public void transactionBlockOfTypeNOTXShouldRunProperly(){
+        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setTxType(OTransaction.TXTYPE.NOTX);
+        OObjectDatabaseTx current = ((OrientDbRepositoryImpl) crud.getRepository()).get().acquire();
+
+        Boolean result = crud.executeTransactionalBlock(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                Hello hello = new Hello();
+                hello.setName("Bob");
+                Hello saved = crud.save(hello);
+                saved.setName("Haha!");
+                crud.save(saved);
+                return true;
+            }
+        });
+
+        assertThat(result).isTrue();
+        assertThat(crud.findAll(new EntityFilter<Hello>() {
+            @Override
+            public boolean accept(Hello hello) {
+                return hello.getName().equals("Haha!");
+            }
+        })).hasSize(1);
     }
 }
