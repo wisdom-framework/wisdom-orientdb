@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
 public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
-    private OObjectDatabaseTx db;
+    private OrientDbTransactionManager txManager;
 
     private final OrientDbRepositoryImpl repo;
 
@@ -46,6 +46,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         transaction.set(false);
     }
 
+    private
     /**
      * Acquire the database connection from the pool.
      */
