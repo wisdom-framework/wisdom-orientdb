@@ -16,11 +16,11 @@ In order to use wisdom-orientdb-object within your wisdom project, you must foll
 The first is to add it's dependency in your `pom.xml`.
 
 ```xml
-<plugin>
+<dependency>
   <groupId>org.wisdom-framework</groupId>
   <artifactId>wisdom-orientdb-object</artifactId>
   <version>${release.version}</version>
-</plugin>
+</dependency>
 ```
 
 The second step is to configure your OrientDB database in wisdom `application.conf`
