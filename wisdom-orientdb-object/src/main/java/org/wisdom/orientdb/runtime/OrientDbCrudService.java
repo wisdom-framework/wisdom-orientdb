@@ -2,9 +2,11 @@ package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.query.OQuery;
-import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.EntityFilter;
+import org.wisdom.api.model.FluentTransaction;
+import org.wisdom.api.model.HasBeenRollBackException;
+import org.wisdom.api.model.TransactionManager;
 import org.wisdom.orientdb.object.OrientDbCrud;
 import org.wisdom.orientdb.object.OrientDbRepository;
 
@@ -22,49 +24,31 @@ import java.util.concurrent.Callable;
 public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private OrientDbTransactionManager txManager;
 
-    private final OrientDbRepositoryImpl repo;
+    private final OrientDbRepository repo;
 
     private final Class<T> entityClass;
 
 
-    private final OObjectDatabasePool pool;
-
-    /**
-     * Flag used in order to know if the instance is used during a transaction in the current thread.
-     */
-    private static final ThreadLocal<Boolean> transaction = new ThreadLocal<Boolean>(){
-        @Override
-        protected Boolean initialValue() {
-            return false;
-        }
-    };
-
     protected OrientDbCrudService(OrientDbRepositoryImpl repo, Class<T> entityClass) {
         this.repo = repo;
-        pool = repo.get();
+        this.txManager = new OrientDbTransactionManager(repo);
         this.entityClass = entityClass;
-        transaction.set(false);
     }
 
-    private
     /**
-     * Acquire the database connection from the pool.
+     * Ask the Transaction manager to give us a db, if we are in a transaction running on the local thread,
+     * the existing db is returned, otherwise an db is retrieved from the pool.
+     * @return An  OObjectDatabaseTx db
      */
-    private void acquire() {
-        if (db == null || db.isClosed()) {
-            db = pool.acquire();
-            //get lazy loading fetching from the conf.
-            db.setLazyLoading(repo.getConf().getAutolazyloading());
-        }
+    private OObjectDatabaseTx acquireDb(){
+        return txManager.acquireDb();
     }
 
     /**
      * Release the database connection to the pool
      */
     private void release() {
-        if (!transaction.get()) {
-            db.close();
-        }
+        txManager.releaseDb();
     }
 
 
@@ -80,9 +64,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T delete(T t) {
-        acquire();
         try {
-            db.delete(t);
+            acquireDb().delete(t);
         } finally {
             release();
         }
@@ -92,9 +75,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     @Override
     public void delete(String id) {
         ORecordId rid = new ORecordId(id);
-        acquire();
         try {
-            db.delete(rid);
+            acquireDb().delete(rid);
         } finally {
             release();
         }
@@ -102,8 +84,9 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public Iterable<T> delete(Iterable<T> ts) {
-        acquire();
+        OObjectDatabaseTx db = acquireDb();
         List<T> deleted = new ArrayList<T>();
+
         try {
             for (T todel : ts) {
                 deleted.add((T) db.delete(todel));
@@ -111,14 +94,14 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         } finally {
             release();
         }
+
         return deleted;
     }
 
     @Override
     public T save(T t) {
-        acquire();
         try {
-            return db.save(t);
+            return acquireDb().save(t);
         } finally {
             release();
         }
@@ -127,7 +110,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     @Override
     public Iterable<T> save(Iterable<T> ts) {
         List<T> saved = new ArrayList<T>();
-        acquire();
+        OObjectDatabaseTx db = acquireDb();
+
         try {
             for (T tosave : ts) {
                 saved.add((T) db.save(tosave));
@@ -141,9 +125,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T findOne(String id) {
-        acquire();
         try {
-            return db.load(new ORecordId(id));
+            return acquireDb().load(new ORecordId(id));
         } finally {
             release();
         }
@@ -151,7 +134,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T findOne(final EntityFilter<T> tEntityFilter) {
-        acquire();
+        OObjectDatabaseTx db = acquireDb();
+
         try {
             for (T entity : db.browseClass(entityClass)) {
                 if (tEntityFilter.accept(entity)) {
@@ -167,9 +151,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public boolean exists(String id) {
-        acquire();
         try {
-            return db.existsUserObjectByRID(new ORecordId(id));
+            return acquireDb().existsUserObjectByRID(new ORecordId(id));
         } finally {
             release();
         }
@@ -177,9 +160,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public Iterable<T> findAll() {
-        acquire();
         try {
-            return db.browseClass(entityClass);
+            return acquireDb().browseClass(entityClass);
         } finally {
             release();
         }
@@ -187,8 +169,9 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public Iterable<T> findAll(Iterable<String> ids) {
-        acquire();
+        OObjectDatabaseTx db = acquireDb();
         List<T> entities = new ArrayList<T>();
+
         try {
             for (String id : ids) {
                 entities.add((T) db.load(new ORecordId(id)));
@@ -202,8 +185,9 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public Iterable<T> findAll(EntityFilter<T> tEntityFilter) {
-        acquire();
+        OObjectDatabaseTx db = acquireDb();
         List<T> entities = new ArrayList<T>();
+
         try {
 
             for (T entity : db.browseClass(entityClass)) {
@@ -219,9 +203,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public List<T> query(OQuery<T> command, Object ... args){
-        acquire();
         try {
-            return db.query(command,args);
+            return acquireDb().query(command, args);
         }finally {
             release();
         }
@@ -229,9 +212,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T load(T entity) {
-        acquire();
         try {
-            return db.load(entity);
+            return acquireDb().load(entity);
         }finally {
             release();
         }
@@ -239,9 +221,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T load(T entity, String fetchPlan) {
-        acquire();
         try {
-            return db.load(entity,fetchPlan);
+            return acquireDb().load(entity, fetchPlan);
         }finally {
             release();
         }
@@ -249,9 +230,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public void attach(T entity) {
-        acquire();
         try {
-            db.attach(entity);
+            acquireDb().attach(entity);
         }finally {
             release();
         }
@@ -259,9 +239,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T detach(T attachedEntity) {
-        acquire();
         try {
-            return db.detach(attachedEntity);
+            return acquireDb().detach(attachedEntity);
         }finally {
             release();
         }
@@ -269,9 +248,8 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T detach(T entity, Boolean returnNonProxyInstance) {
-        acquire();
         try {
-            return db.detach(entity,returnNonProxyInstance);
+            return acquireDb().detach(entity, returnNonProxyInstance);
         }finally {
             release();
         }
@@ -280,7 +258,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public long count() {
-        return db.countClass(entityClass.getSimpleName());
+        return acquireDb().countClass(entityClass.getSimpleName());
     }
 
     @Override
@@ -289,38 +267,49 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     }
 
     @Override
-    public void executeTransactionalBlock(Runnable runnable) {
-        transaction.set(true);
-        acquire();
-        db.begin(repo.getConf().getTxType());
+    public void executeTransactionalBlock(final Runnable runnable) throws HasBeenRollBackException{
+        txManager.begin();
 
-        try {
+        try{
             runnable.run();
-            db.commit();
-        } catch (Exception e) {
-            db.rollback();
-            throw e;
+            txManager.commit();
+        }catch (Exception e){
+            txManager.rollback();
+            throw new HasBeenRollBackException(e);
         } finally {
-            transaction.set(false);
-            release();
+            txManager.close();
         }
     }
 
     @Override
-    public <A> A executeTransactionalBlock(Callable<A> aCallable) {
-        transaction.set(true);
-        acquire();
-        db.begin(repo.getConf().getTxType());
-        try {
-            A result = aCallable.call();
-            db.commit();
-            return result;
-        } catch (Exception e) {
-            db.rollback();
-            return null;
+    public <A> A executeTransactionalBlock(Callable<A> aCallable) throws HasBeenRollBackException{
+        txManager.begin();
+
+        try{
+            A ret = aCallable.call();
+            txManager.commit();
+            return ret;
+        }catch (Exception e){
+            txManager.rollback();
+            throw new HasBeenRollBackException(e);
         } finally {
-            transaction.set(false);
-            release();
+            txManager.close();
         }
     }
+
+    @Override
+    public TransactionManager getTransactionManager() {
+        return txManager;
+    }
+
+    @Override
+    public <R> FluentTransaction<R> transaction() {
+        return FluentTransaction.transaction(txManager);
+    }
+
+    @Override
+    public <R> FluentTransaction.Intermediate transaction(Callable<R> callable) {
+        return transaction(callable);
+    }
+
 }
