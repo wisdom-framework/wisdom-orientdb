@@ -1,8 +1,6 @@
 language: java
 jdk:
 - oraclejdk7
-install: 
-- mvn -U clean
 after_success:
 - echo "<settings><servers><server><id>ossrh</id><username>\${env.OSSRH_USER}</username><password>\${env.OSSRH_PASS}</password></server></servers></settings>"
   > ~/settings.xml
