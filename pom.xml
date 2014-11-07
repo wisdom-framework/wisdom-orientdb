@@ -26,8 +26,8 @@
     </licenses>
 
     <properties>
-        <orientdb.version>2.0-M1</orientdb.version>
-        <wisdom.version>0.7-SNAPSHOT</wisdom.version>
+        <orientdb.version>2.0-M2</orientdb.version>
+        <wisdom.version>0.6.5</wisdom.version>
     </properties>
 
     <scm>
@@ -58,11 +58,6 @@
     <dependencyManagement>
       <dependencies>
         <!-- OrientDB bundles -->
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
-            <artifactId>orient-commons</artifactId>
-            <version>${orientdb.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>

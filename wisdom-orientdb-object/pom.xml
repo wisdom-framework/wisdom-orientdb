@@ -55,10 +55,6 @@
         <!-- OrientDB dep. -->
         <dependency>
             <groupId>com.orientechnologies</groupId>
-            <artifactId>orient-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.orientechnologies</groupId>
             <artifactId>orientdb-core</artifactId>
         </dependency>
 
