@@ -43,9 +43,8 @@ public class Hello {
         Hello hello = (Hello) o;
 
         if (getId() != null ? !getId().equals(hello.getId()) : hello.getId() != null) return false;
-        if (getName() != null ? !getName().equals(hello.getName()) : hello.getName() != null) return false;
+        return !(getName() != null ? !getName().equals(hello.getName()) : hello.getName() != null);
 
-        return true;
     }
 
     @Override

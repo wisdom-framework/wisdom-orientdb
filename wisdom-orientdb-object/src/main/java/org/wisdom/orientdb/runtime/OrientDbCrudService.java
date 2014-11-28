@@ -21,15 +21,15 @@ import java.util.concurrent.Callable;
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
-public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
-    private OrientDbTransactionManager txManager;
+class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
+    private final OrientDbTransactionManager txManager;
 
     private final OrientDbRepository repo;
 
     private final Class<T> entityClass;
 
 
-    protected OrientDbCrudService(OrientDbRepositoryImpl repo, Class<T> entityClass) {
+    OrientDbCrudService(OrientDbRepositoryImpl repo, Class<T> entityClass) {
         this.repo = repo;
         this.txManager = new OrientDbTransactionManager(repo);
         this.entityClass = entityClass;
@@ -85,7 +85,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     @Override
     public Iterable<T> delete(Iterable<T> ts) {
         OObjectDatabaseTx db = acquireDb();
-        List<T> deleted = new ArrayList<T>();
+        List<T> deleted = new ArrayList<>();
 
         try {
             for (T todel : ts) {
@@ -109,7 +109,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public Iterable<T> save(Iterable<T> ts) {
-        List<T> saved = new ArrayList<T>();
+        List<T> saved = new ArrayList<>();
         OObjectDatabaseTx db = acquireDb();
 
         try {
@@ -170,7 +170,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     @Override
     public Iterable<T> findAll(Iterable<String> ids) {
         OObjectDatabaseTx db = acquireDb();
-        List<T> entities = new ArrayList<T>();
+        List<T> entities = new ArrayList<>();
 
         try {
             for (String id : ids) {
@@ -186,7 +186,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     @Override
     public Iterable<T> findAll(EntityFilter<T> tEntityFilter) {
         OObjectDatabaseTx db = acquireDb();
-        List<T> entities = new ArrayList<T>();
+        List<T> entities = new ArrayList<>();
 
         try {
 
@@ -309,7 +309,7 @@ public class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public <R> FluentTransaction.Intermediate transaction(Callable<R> callable) {
-        return transaction(callable);
+        return FluentTransaction.transaction(txManager).with(callable);
     }
 
 }

@@ -1,6 +1,5 @@
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.core.entity.OEntityManager;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
@@ -8,6 +7,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.wisdom.api.model.Crud;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.object.OrientDbCrud;
+import org.wisdom.orientdb.object.OrientDbRepoCommand;
 import org.wisdom.orientdb.object.OrientDbRepository;
 
 import java.util.ArrayList;
@@ -17,53 +17,54 @@ import java.util.Dictionary;
 /**
  * Implementation of the OrientDbRepository.
  */
-public class OrientDbRepositoryImpl implements OrientDbRepository {
+class OrientDbRepositoryImpl implements OrientDbRepository {
     private final OObjectDatabasePool server;
-    private final WOrientConf conf;
+    private final OrientDbRepoCommand repoCmd;
 
-    private Collection<ServiceRegistration> registrations = new ArrayList<>();
+    private final Collection<ServiceRegistration> registrations = new ArrayList<>();
 
-    private Collection<OrientDbCrud<?,?>> crudServices = new ArrayList<>();
+    private final Collection<OrientDbCrud<?,?>> crudServices = new ArrayList<>();
 
-    public OrientDbRepositoryImpl(WOrientConf conf){
-        this.server = new OObjectDatabasePool(conf.getUrl(),conf.getUser(),conf.getPass());
-        this.conf = conf;
+    OrientDbRepositoryImpl(OrientDbRepoCommand repoCmd){
+        this.server = new OObjectDatabasePool(repoCmd.getConf().getUrl(),
+                repoCmd.getConf().getUser(),
+                repoCmd.getConf().getPass());
+        this.repoCmd = repoCmd;
     }
 
     public WOrientConf getConf(){
-        return conf;
+        return repoCmd.getConf();
     }
 
-    protected void addCrubService(Class entity){
+    void registerAllCrud(BundleContext context){
         OObjectDatabaseTx db = server.acquire();
-        db.getEntityManager().registerEntityClass(entity);
-        db.close();
 
-        crudServices.add(new OrientDbCrudService<Object>(this,entity));
-    }
+        repoCmd.init(db); //Call the OrientDbRepoCommand init
 
-    protected void registerAllCrud(BundleContext context){
-        for(OrientDbCrud crud: crudServices){
-            Dictionary prop = conf.toDico();
-            prop.put(Crud.ENTITY_CLASS_PROPERTY,crud.getEntityClass());
-            prop.put(Crud.ENTITY_CLASSNAME_PROPERTY,crud.getEntityClass().getName());
-            registrations.add(context.registerService(new String[]{Crud.class.getName(),OrientDbCrud.class.getName()},crud,prop));
+        for(Class entity: repoCmd.getEntityClass()){
+            //Service properties
+            Dictionary prop = getConf().toDico();
+            prop.put(Crud.ENTITY_CLASS_PROPERTY,entity);
+            prop.put(Crud.ENTITY_CLASSNAME_PROPERTY,entity.getName());
+
+            registrations.add(context.registerService(new String[]{Crud.class.getName(),OrientDbCrud.class.getName()},
+                    new OrientDbCrudService(this,entity),
+                    prop));
         }
+
+        db.close();
     }
 
-    protected void destroy(){
-        OEntityManager entityManager = server.acquire().getEntityManager();
+    void destroy(){
+        OObjectDatabaseTx db = server.acquire();
 
         for(ServiceRegistration reg: registrations){
             reg.unregister();
         }
 
-        for(Crud crud: crudServices){
-            entityManager.deregisterEntityClass(crud.getEntityClass());
-        }
+        repoCmd.destroy(db); //Call the OrientDbRepoCommand init
 
         registrations.clear();
-        crudServices.clear();
 
         server.close();
     }

@@ -120,20 +120,20 @@ public final class WOrientConf {
      * @param config
      * @return
      */
-    public static Collection<WOrientConf> createFromApplicationConf(Configuration config) {
-        Configuration orient = config.getConfiguration(ORIENTDB_PREFIX);
+    public static Collection<WOrientConf> createFromApplicationConf(Configuration config, String prefix) {
+        Configuration orient = config.getConfiguration(prefix);
 
         if(orient == null){
             return Collections.EMPTY_SET;
         }
 
-        Set<String> subkeys = new HashSet<String>();
+        Set<String> subkeys = new HashSet<>();
 
         for (String key : orient.asProperties().stringPropertyNames()) {
             subkeys.add(key.split("\\.", 2)[0]);
         }
 
-        Collection<WOrientConf> subconfs = new ArrayList<WOrientConf>(subkeys.size());
+        Collection<WOrientConf> subconfs = new ArrayList<>(subkeys.size());
 
         for (String subkey : subkeys) {
             subconfs.add(new WOrientConf(subkey, orient.getConfiguration(subkey)));

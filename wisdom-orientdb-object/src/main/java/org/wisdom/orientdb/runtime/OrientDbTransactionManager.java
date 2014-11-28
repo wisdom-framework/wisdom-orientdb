@@ -10,9 +10,9 @@ import org.wisdom.api.model.TransactionManager;
  * Implementation of {@link TransactionManager} that delegates to the {@link OObjectDatabaseTx}.
  * Each transaction is associated with the current thread.
  */
-public class OrientDbTransactionManager implements TransactionManager{
+class OrientDbTransactionManager implements TransactionManager{
 
-    private OrientDbRepositoryImpl repo;
+    private final OrientDbRepositoryImpl repo;
 
     private final OObjectDatabasePool pool;
 
@@ -30,13 +30,13 @@ public class OrientDbTransactionManager implements TransactionManager{
     };
 
 
-    public OrientDbTransactionManager(OrientDbRepositoryImpl repo) {
+    OrientDbTransactionManager(OrientDbRepositoryImpl repo) {
         this.repo=repo;
         pool = repo.get();
         transaction.set(false);
     }
 
-    protected OObjectDatabaseTx acquireDb(){
+    OObjectDatabaseTx acquireDb(){
         if(db == null || db.isClosed()){
             db = pool.acquire();
 
@@ -46,7 +46,7 @@ public class OrientDbTransactionManager implements TransactionManager{
         return db;
     }
 
-    protected void releaseDb(){
+    void releaseDb(){
         if(!transaction.get()){
             db.close();
         }

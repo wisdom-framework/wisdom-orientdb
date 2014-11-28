@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.orientechnologies.orient.core.Orient;
-import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import com.orientechnologies.orient.object.enhancement.OObjectProxyMethodHandler;
 import org.apache.felix.ipojo.annotations.*;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.BundleTrackerCustomizer;
 import org.slf4j.Logger;
@@ -19,14 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
+import org.wisdom.orientdb.object.OrientDbRepoCommand;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.*;
 
 import static java.io.File.separator;
+import static org.wisdom.orientdb.conf.WOrientConf.ORIENTDB_PREFIX;
 
 /**
  * created: 5/13/14.
@@ -35,9 +35,9 @@ import static java.io.File.separator;
  */
 @Component(name = OrientDbCrudProvider.COMPONENT_NAME)
 @Instantiate(name = OrientDbCrudProvider.INSTANCE_NAME)
-public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<OrientDbRepositoryImpl>> {
-    public static final String COMPONENT_NAME = "wisdom:orientdb:crudservice:factory";
-    public static final String INSTANCE_NAME = "wisdom:orientdb:crudservice:provider";
+class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<ServiceRegistration>> {
+    static final String COMPONENT_NAME = "wisdom:orientdb:crudservice:factory";
+    static final String INSTANCE_NAME = "wisdom:orientdb:crudservice:provider";
 
 
     @Requires
@@ -46,7 +46,7 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
     @Requires
     private JacksonModuleRepository moduleRepository;
 
-    private Logger logger = LoggerFactory.getLogger(OrientDbCrudProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(OrientDbCrudProvider.class);
 
     private static final SimpleModule module = new SimpleModule("Orientdb Ignore Proxy");
 
@@ -55,15 +55,13 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             @Override
             public void serialize(OObjectProxyMethodHandler oObjectProxyMethodHandler, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
                 jsonGenerator.writeStartObject();
-                jsonGenerator.writeStartObject();
             }
         });
     }
 
-
     private final BundleContext context;
 
-    private BundleTracker<Collection<OrientDbRepositoryImpl>> bundleTracker;
+    private BundleTracker<Collection<ServiceRegistration>> bundleTracker;
 
     private Collection<WOrientConf> confs;
 
@@ -73,12 +71,6 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
     @Validate
     private void start(){
-        confs = WOrientConf.createFromApplicationConf(appConf);
-
-        if(confs.isEmpty()){
-            return;
-        }
-
         //Ignore javaassit injected handler created by Orientdb for json serialization
         moduleRepository.register(module);
 
@@ -88,16 +80,18 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
         //remove the hook since we handle shutdown in the stop callback
         Orient.instance().removeShutdownHook();
 
-        bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
-        bundleTracker.open();
+        //Parse the configuration
+        confs = WOrientConf.createFromApplicationConf(appConf, ORIENTDB_PREFIX);
+
+        //OrientDb database has been set up from the configuration file.
+        if(!confs.isEmpty()){
+            bundleTracker = new BundleTracker<>(context, Bundle.ACTIVE, this);
+            bundleTracker.open();
+        }
     }
 
     @Invalidate
     private void stop(){
-        if(confs.isEmpty()){
-            return;
-        }
-
         if(bundleTracker != null){
             bundleTracker.close();
         }
@@ -109,8 +103,8 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
 
 
     @Override
-    public Collection<OrientDbRepositoryImpl> addingBundle(Bundle bundle, BundleEvent bundleEvent) {
-        Collection<OrientDbRepositoryImpl> repos = new HashSet<>();
+    public Collection<ServiceRegistration> addingBundle(Bundle bundle, BundleEvent bundleEvent) {
+        Collection<ServiceRegistration> registrations = new HashSet<>();
 
         for(WOrientConf conf: confs){
 
@@ -123,71 +117,87 @@ public class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<
             logger.info("OrientDB Database configuration found for {} : {}",
                     packageNameToPath(conf.getNameSpace()), conf.toString());
 
-            //Create a pull for this configuration
-            OrientDbRepositoryImpl repo  = new OrientDbRepositoryImpl(conf);
-            OObjectDatabaseTx db;
-
-            //Get the connection from the pool
-            try{
-                db = repo.get().acquire();
-            }catch(Exception e){
-                if(appConf.isProd()){
-                    throw e;
-                }
-
-                logger.debug("Cannot access to orientdb database {}; creating new database at url: {}",
-                        conf.getAlias(),conf.getUrl(),e);
-
-                //Create the database if in test or dev. mode
-                db = new OObjectDatabaseTx(conf.getUrl()).create();
-                //Add the user as admin to the newly created db.
-                db.getMetadata().getSecurity().createUser(conf.getUser(), conf.getPass(), ORole.ADMIN);
-            }
-
-
-            //if(!db.exists()){
-            //
-            //}
+            List<Class<?>> entities = new ArrayList<>();
 
             //Load the entities from the bundle
             do{
                 URL entry = enums.nextElement();
                 try {
-                    repo.addCrubService(bundle.loadClass(urlToClassName(entry)));
+                    entities.add(bundle.loadClass(urlToClassName(entry)));
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    logger.error("Cannot load entity class {}",entry,e);
                 }
             }while (enums.hasMoreElements());
 
+            if(entities.isEmpty()){
+                logger.debug("OrientDB configuration {} does not contains any Entity class, configuration is ignored.",
+                        conf.getAlias());
+                continue;
+            }
 
-            logger.debug("Crud service has been added for {} in {} OrientDb.",conf.getNameSpace(),conf.getAlias());
-
-            //register all crud service available in this repo
-            repo.registerAllCrud(context);
-
-            //close the db
-            db.close();
-
-            //add this configuration repo
-            repos.add(repo);
+            //Create and register a new OrientDbRepoCommand for the given entities and db configuration
+            OrientDbRepoCommand repoWB = new OrientDbRepoCommandImpl(entities,conf);
+            registrations.add(context.registerService(OrientDbRepoCommand.class, repoWB, new Hashtable<String, Object>()));
+            logger.debug("The command for OrientDb database {} has been published.",conf.getAlias());
         }
 
-        return repos;
+        return registrations;
     }
 
     @Override
-    public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepositoryImpl> repositories) {
+    public void modifiedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<ServiceRegistration> registrations) {
         //TODO very dummy fix that
         //removedBundle(bundle,bundleEvent,repositories);
         //addingBundle(bundle,bundleEvent);
     }
 
     @Override
-    public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<OrientDbRepositoryImpl> repositories) {
-        for(OrientDbRepositoryImpl repo: repositories){
-            repo.destroy();
+    public void removedBundle(Bundle bundle, BundleEvent bundleEvent, Collection<ServiceRegistration> registrations) {
+        for(ServiceRegistration sreg: registrations){
+            sreg.unregister();
         }
     }
+
+    /**
+     * Simple OrientDbRepoCommand which register the Entity class in the database entity manager upon initialisation and
+     * remove them upon destroy.
+     */
+    class OrientDbRepoCommandImpl implements OrientDbRepoCommand {
+
+        private final WOrientConf conf;
+
+        private final List<Class<?>> entities;
+
+        public OrientDbRepoCommandImpl(List<Class<?>> entities, WOrientConf conf) {
+            this.entities =entities;
+            this.conf = conf;
+        }
+
+        public WOrientConf getConf() {
+            return conf;
+        }
+
+        public List<Class<?>> getEntityClass() {
+            return entities;
+        }
+
+        public void init(OObjectDatabaseTx db) {
+            for(Class entity: entities){
+                db.getEntityManager().registerEntityClass(entity);
+            }
+        }
+
+        public void destroy(OObjectDatabaseTx db) {
+            for(Class entity: entities){
+                db.getEntityManager().deregisterEntityClass(entity);
+            }
+        }
+    }
+
+
+    //
+    // Helper methods
+    //
 
     private static String urlToClassName(URL url){
         String path = url.getPath();

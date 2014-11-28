@@ -6,19 +6,22 @@
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
-import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
-import org.assertj.core.api.Assertions;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.wisdom.api.model.EntityFilter;
 import org.wisdom.api.model.HasBeenRollBackException;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.model.Hello;
 import org.wisdom.orientdb.object.OrientDbCrud;
+import org.wisdom.orientdb.object.OrientDbRepoCommand;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE.NOTX;
@@ -34,7 +37,7 @@ public class OrientDbCrudServiceTest {
     private static OObjectDatabaseTx db;
     private static OrientDbCrud<Hello, String> crud;
 
-    public static TemporaryFolder folder = new TemporaryFolder();
+    private final static TemporaryFolder folder = new TemporaryFolder();
 
     @BeforeClass
     public static void setUp() throws IOException {
@@ -43,11 +46,29 @@ public class OrientDbCrudServiceTest {
 
         db = new OObjectDatabaseTx(url).create();
         OSecurity sm = db.getMetadata().getSecurity();
-        OUser user = sm.createUser("test", "test", new String[]{"admin"});
-        WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true, NOTX);
+        sm.createUser("test", "test", "admin");
+        final WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true, NOTX);
+        final List<Class<?>> entities = new ArrayList<>(1);
+        entities.add(Hello.class);
         db.getEntityManager().registerEntityClass(Hello.class);
 
-        crud = new OrientDbCrudService<Hello>(new OrientDbRepositoryImpl(conf),Hello.class);
+
+        OrientDbRepoCommand repoCommand = new OrientDbRepoCommand() {
+            public WOrientConf getConf() {
+                return conf;
+            }
+            public List<Class<?>> getEntityClass() {
+                return entities;
+            }
+            public void init(OObjectDatabaseTx db) {
+            }
+            public void destroy(OObjectDatabaseTx db) {
+            }
+        };
+
+
+
+        crud = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Hello.class);
     }
 
     @AfterClass
@@ -60,15 +81,6 @@ public class OrientDbCrudServiceTest {
             }
             folder.delete();
         }
-    }
-
-    @After
-    public void afterEach() {
-        //db.drop();
-    }
-
-    @Before
-    public void beforeEach() {
     }
 
     @Test
@@ -131,12 +143,12 @@ public class OrientDbCrudServiceTest {
     @Test
     public void crudShouldNotUseLazyLoadingIfSetToFalse(){
         ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(false);
-        OObjectDatabaseTx current = ((OrientDbRepositoryImpl) crud.getRepository()).get().acquire();
+        OObjectDatabaseTx current = crud.getRepository().get().acquire();
 
         //trigger OrientDbCrudService#acquire
         Hello hello = new Hello();
         hello.setName("Lazy");
-        Hello saved = crud.save(hello);
+        crud.save(hello);
 
         assertThat(current.isLazyLoading()).isFalse();
 
@@ -147,12 +159,12 @@ public class OrientDbCrudServiceTest {
     @Test
     public void crudShouldUseLazyLoadingIfSetToTrue(){
         ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
-        OObjectDatabaseTx current = ((OrientDbRepositoryImpl) crud.getRepository()).get().acquire();
+        OObjectDatabaseTx current = crud.getRepository().get().acquire();
 
         //trigger OrientDbCrudService#acquire
         Hello hello = new Hello();
         hello.setName("Bob");
-        Hello saved = crud.save(hello);
+        crud.save(hello);
 
         assertThat(current.isLazyLoading()).isEqualTo(true);
     }
