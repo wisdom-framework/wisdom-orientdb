@@ -36,6 +36,20 @@ The example above shows how to set up an orientdb database with an alias test. T
 
 The optional `orientdb.<alias>.autolazyloading` boolean property is a convenient way to configure the default orientDB lazy loading behavior.
 
+### Alternative 
+
+As an alternative you can set up your OrientDB model by providing a n[OrientDbRepoCommand](https://github.com/wisdom-framework/wisdom-orientdb/blob/master/wisdom-orientdb-object/src/main/java/org/wisdom/orientdb/object/OrientDbRepoCommand.java) service.  
+
+```Java
+    WOrientConf getConf();
+    List<Class<?>> getEntityClass();
+    void init(OObjectDatabaseTx db);
+    void destroy(OObjectDatabaseTx db);
+```
+
+The service implementation must contain the configuration and the entities class list. The `init` and `destroy`
+ callback are hook that allows for: registering and de-registering your entities, as well as manage evolution. 
+
 ## Usage
 
 Once wisdom-orientDB has been properly set up you can now requires either wisdom [Crud](http://wisdom-framework.org/documentation/apidocs/0.6.4/org/wisdom/api/model/Crud.html) services or the specialized [OrientDbCrud](https://github.com/wisdom-framework/wisdom-orientdb/blob/master/wisdom-orientdb-object/src/main/java/org/wisdom/orientdb/object/OrientDbCrud.java) for each of the entity available in your model package.
