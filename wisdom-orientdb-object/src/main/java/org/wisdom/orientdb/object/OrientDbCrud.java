@@ -37,7 +37,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
     /**
      * Load the given entity from the db and return it.
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object)
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object)}
      * @param entity The entity to load from the db.
      * @return The attached version of the entity.
      */
@@ -46,7 +46,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
     /**
      * Load the given entity from the db using the given fetchPlan and return it.
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object, String)
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#load(Object)}
      * @param entity The entity to load from the db.
      * @param fetchPlan The fetchPlan used to retrieve the entity.
      * @return The attached version of the entity
@@ -57,7 +57,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
      * Attached the given entity to the db. In this way all changes done within the object without using setters
      * will be copied to the document.
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#attach(Object)
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#attach(Object)}
      * @param entity The entity to be attached.
      */
     void attach(T entity);
@@ -65,7 +65,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
     /**
      * Detached an entity from the database. All of the entity field can now be modified without impact on the db.
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object)
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object)}
      * @param attachedEntity The entity that needs to be detached
      * @return A detached version of the entity (a proxy instance).
      */
@@ -74,7 +74,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
     /**
      * Detached an entity from the database. All of the entity field can now be modified without impact on the db.
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object, boolean)
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#detach(Object, boolean)}
      * @param attachedEntity The entity that needs to be detached
      * @param returnNonProxyInstance <code>true</code> if you want the returned entity to be a plain object,
      *                               and not a proxy.

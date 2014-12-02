@@ -6,7 +6,6 @@
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
-import com.orientechnologies.orient.core.tx.OTransaction;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -47,7 +46,8 @@ public class OrientDbCrudServiceTest {
         db = new OObjectDatabaseTx(url).create();
         OSecurity sm = db.getMetadata().getSecurity();
         sm.createUser("test", "test", "admin");
-        final WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model",true, NOTX);
+        final WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model");
+        conf.setTxType(NOTX);
         final List<Class<?>> entities = new ArrayList<>(1);
         entities.add(Hello.class);
         db.getEntityManager().registerEntityClass(Hello.class);
@@ -171,7 +171,7 @@ public class OrientDbCrudServiceTest {
 
     @Test
     public void transactionBlockOfTypeNOTXShouldRunProperly(){
-        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setTxType(OTransaction.TXTYPE.NOTX);
+        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setTxType(NOTX);
 
         Boolean result = null;
         try {

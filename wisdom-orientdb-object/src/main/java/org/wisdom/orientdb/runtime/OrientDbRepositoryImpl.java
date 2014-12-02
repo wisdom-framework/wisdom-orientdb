@@ -39,7 +39,7 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
     void registerAllCrud(BundleContext context){
         OObjectDatabaseTx db = server.acquire();
 
-        repoCmd.init(db); //Call the OrientDbRepoCommand init
+        repoCmd.init(db); //Call the OrientDbRepoCommand init callback
 
         for(Class entity: repoCmd.getEntityClass()){
             //Service properties
@@ -62,7 +62,7 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
             reg.unregister();
         }
 
-        repoCmd.destroy(db); //Call the OrientDbRepoCommand init
+        repoCmd.destroy(db); //Call the OrientDbRepoCommand destroy callback
 
         registrations.clear();
 

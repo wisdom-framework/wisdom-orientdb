@@ -6,6 +6,16 @@ import java.util.*;
 
 import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE;
 
+/**
+ * Convenient Object used in order to set up an {@link org.wisdom.orientdb.object.OrientDbRepository}.
+ *
+ * It must contains:
+ * - alias, the repository alias
+ * - url, the database url
+ * - user, the database user name
+ * - pass, the database password
+ * - nameSpace, the package name of the entities class.
+ */
 public final class WOrientConf {
     public static final String ORIENTDB_PREFIX = "orientdb";
     public static final String ORIENTDB_URL = "url";
@@ -20,20 +30,15 @@ public final class WOrientConf {
     private final String user;
     private final String pass;
     private final String nameSpace;
-    private Boolean autolazyloading;
-    private TXTYPE txtype;
+    private Boolean autolazyloading = true;
+    private TXTYPE txtype = TXTYPE.OPTIMISTIC;
 
-
-    public WOrientConf(String alias, String url, String user, String pass, String nameSpace,
-                       Boolean autolazyloading, TXTYPE txtype) {
+    public WOrientConf(String alias, String url, String user, String pass, String nameSpace) {
         this.alias = alias;
         this.url = url;
         this.user = user;
         this.pass = pass;
         this.nameSpace = nameSpace;
-
-        this.autolazyloading = autolazyloading;
-        this.txtype = txtype;
     }
 
     private WOrientConf(String alias, Configuration config) {
@@ -42,11 +47,11 @@ public final class WOrientConf {
             config.getOrDie(ORIENTDB_URL),
             config.getOrDie(ORIENTDB_USER),
             config.getOrDie(ORIENTDB_PASS),
-            config.getOrDie(ORIENTDB_PACKAGE),
-
-            config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true),
-            config.get(ORIENTDB_TXTYPE, TXTYPE.class, TXTYPE.OPTIMISTIC)
+            config.getOrDie(ORIENTDB_PACKAGE)
         );
+
+        this.setAutoLazyLoading(config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true));
+        this.setTxType(config.get(ORIENTDB_TXTYPE, TXTYPE.class, TXTYPE.OPTIMISTIC));
     }
 
     public String getAlias() {
