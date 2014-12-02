@@ -38,7 +38,7 @@ The optional `orientdb.<alias>.autolazyloading` boolean property is a convenient
 
 ### Alternative 
 
-As an alternative you can set up your OrientDB model by providing a n[OrientDbRepoCommand](https://github.com/wisdom-framework/wisdom-orientdb/blob/master/wisdom-orientdb-object/src/main/java/org/wisdom/orientdb/object/OrientDbRepoCommand.java) service.  
+As an alternative you can set up your OrientDB model by providing an [OrientDbRepoCommand](https://github.com/wisdom-framework/wisdom-orientdb/blob/master/wisdom-orientdb-object/src/main/java/org/wisdom/orientdb/object/OrientDbRepoCommand.java) service.  
 
 ```Java
     WOrientConf getConf();
