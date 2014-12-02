@@ -123,10 +123,10 @@ public final class WOrientConf {
      * url = "plocal:/home/wisdom/test/db"
      *
      * @param config
-     * @return
+     * @return A Collection of WOrientConf retrieve from the Wisdom configuration file.
      */
-    public static Collection<WOrientConf> createFromApplicationConf(Configuration config, String prefix) {
-        Configuration orient = config.getConfiguration(prefix);
+    public static Collection<WOrientConf> createFromApplicationConf(Configuration config) {
+        Configuration orient = config.getConfiguration(ORIENTDB_PREFIX);
 
         if(orient == null){
             return Collections.EMPTY_SET;

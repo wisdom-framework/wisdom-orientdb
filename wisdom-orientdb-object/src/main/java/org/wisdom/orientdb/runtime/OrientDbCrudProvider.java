@@ -26,7 +26,6 @@ import java.net.URL;
 import java.util.*;
 
 import static java.io.File.separator;
-import static org.wisdom.orientdb.conf.WOrientConf.ORIENTDB_PREFIX;
 
 /**
  * created: 5/13/14.
@@ -81,7 +80,7 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
         Orient.instance().removeShutdownHook();
 
         //Parse the configuration
-        confs = WOrientConf.createFromApplicationConf(appConf, ORIENTDB_PREFIX);
+        confs = WOrientConf.createFromApplicationConf(appConf);
 
         //OrientDb database has been set up from the configuration file.
         if(!confs.isEmpty()){

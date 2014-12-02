@@ -11,7 +11,7 @@ import java.util.List;
  * The OrientDbCrud is a standard wisdom Crud service with some feature specific to Orientdb such as the possibility to
  * execute OQuery and load the entity from an instance.
  *
- * @See   org.wisdom.api.model.Crud
+ * {@link org.wisdom.api.model.Crud}
  * @param <T> The type of the entity
  * @param <I> The type of the id. ( either Long, Object or String )
  */
@@ -27,7 +27,7 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
      *  new OSQLSynchQuery<T>("select * from "+T.simpleName()+" where ID = 10 and name like 'G%'"));
      *  </code>
      *
-     * @see com.orientechnologies.orient.object.db.OObjectDatabaseTx#query
+     * {@link com.orientechnologies.orient.object.db.OObjectDatabaseTx#query}
      * @param command The Sql command to run
      * @param args The arguments
      * @return The result of the request as a list of entities.

@@ -6,7 +6,7 @@ import org.wisdom.api.model.Repository;
 /**
  * The OrientDbRepository is a standard wisdom db Repository providing OrientDbCrud services.
  *
- * @See org.wisdom.api.model.Repository
+ * {@link org.wisdom.api.model.Repository}
  */
 public interface OrientDbRepository extends Repository<OObjectDatabasePool> {
 
