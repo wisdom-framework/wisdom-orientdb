@@ -20,6 +20,7 @@ import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.object.OrientDbRepoCommand;
+import sun.misc.CompoundEnumeration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -107,26 +108,26 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
 
         for(WOrientConf conf: confs){
 
-            Enumeration<URL> enums = bundle.findEntries(packageNameToPath(conf.getNameSpace()), "*.class", true);
-
-            if(enums == null || !enums.hasMoreElements()){
-                continue; //next configuration
-            }
-
-            logger.info("OrientDB Database configuration found for {} : {}",
-                    packageNameToPath(conf.getNameSpace()), conf.toString());
-
             List<Class<?>> entities = new ArrayList<>();
 
-            //Load the entities from the bundle
-            do{
-                URL entry = enums.nextElement();
-                try {
-                    entities.add(bundle.loadClass(urlToClassName(entry)));
-                } catch (ClassNotFoundException e) {
-                    logger.error("Cannot load entity class {}",entry,e);
+            for(String ns : conf.getNameSpace()) {
+                Enumeration<URL> enums = bundle.findEntries(packageNameToPath(ns), "*.class", true);
+                if(enums == null || !enums.hasMoreElements()){
+                    continue;
                 }
-            }while (enums.hasMoreElements());
+                logger.info("OrientDB Database configuration found for {} : {}",
+                        packageNameToPath(ns), conf.toString());
+
+                //Load the entities from the bundle
+                do{
+                    URL entry = enums.nextElement();
+                    try {
+                        entities.add(bundle.loadClass(urlToClassName(entry)));
+                    } catch (ClassNotFoundException e) {
+                        logger.error("Cannot load entity class {}",entry,e);
+                    }
+                }while (enums.hasMoreElements());
+            }
 
             if(entities.isEmpty()){
                 logger.debug("OrientDB configuration {} does not contains any Entity class, configuration is ignored.",

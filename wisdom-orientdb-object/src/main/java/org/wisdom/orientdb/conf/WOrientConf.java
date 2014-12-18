@@ -29,16 +29,16 @@ public final class WOrientConf {
     private final String url;
     private final String user;
     private final String pass;
-    private final String nameSpace;
+    private final List<String> nameSpaces;
     private Boolean autolazyloading = true;
     private TXTYPE txtype = TXTYPE.OPTIMISTIC;
 
-    public WOrientConf(String alias, String url, String user, String pass, String nameSpace) {
+    public WOrientConf(String alias, String url, String user, String pass, List<String> nameSpace) {
         this.alias = alias;
         this.url = url;
         this.user = user;
         this.pass = pass;
-        this.nameSpace = nameSpace;
+        this.nameSpaces = nameSpace;
     }
 
     private WOrientConf(String alias, Configuration config) {
@@ -47,9 +47,8 @@ public final class WOrientConf {
             config.getOrDie(ORIENTDB_URL),
             config.getOrDie(ORIENTDB_USER),
             config.getOrDie(ORIENTDB_PASS),
-            config.getOrDie(ORIENTDB_PACKAGE)
+            config.getList(ORIENTDB_PACKAGE)
         );
-
         this.setAutoLazyLoading(config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true));
         this.setTxType(config.get(ORIENTDB_TXTYPE, TXTYPE.class, TXTYPE.OPTIMISTIC));
     }
@@ -70,8 +69,8 @@ public final class WOrientConf {
         return pass;
     }
 
-    public String getNameSpace() {
-        return nameSpace;
+    public List<String> getNameSpace() {
+        return nameSpaces;
     }
 
     public TXTYPE getTxType() {
@@ -103,7 +102,7 @@ public final class WOrientConf {
         dico.put("name",alias);
         dico.put(ORIENTDB_URL,url);
         dico.put(ORIENTDB_USER,user);
-        dico.put(ORIENTDB_PACKAGE,nameSpace);
+        dico.put(ORIENTDB_PACKAGE,nameSpaces);
         dico.put(ORIENTDB_AUTOLAZYLOADGING,autolazyloading);
         dico.put(ORIENTDB_TXTYPE,txtype);
         return dico;
@@ -153,7 +152,7 @@ public final class WOrientConf {
                 "alias='" + alias + '\'' +
                 ", url='" + url + '\'' +
                 ", user='" + user + '\'' +
-                ", nameSpace='" + nameSpace + '\'' +
+                ", nameSpace='" + nameSpaces.toString()+ '\'' +
                 ", autolazyloading=" + autolazyloading + '\'' +
                 ", txtype=" + txtype +
                 '}';
