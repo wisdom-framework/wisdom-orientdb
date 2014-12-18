@@ -5,6 +5,7 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.google.common.collect.Lists;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.AfterClass;
@@ -17,9 +18,11 @@ import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.model.Hello;
 import org.wisdom.orientdb.object.OrientDbCrud;
 import org.wisdom.orientdb.object.OrientDbRepoCommand;
+import org.wisdom.orientdb.othermodel.Olleh;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -35,6 +38,7 @@ import static org.assertj.core.api.Assertions.fail;
 public class OrientDbCrudServiceTest {
     private static OObjectDatabaseTx db;
     private static OrientDbCrud<Hello, String> crud;
+    private static OrientDbCrud<Olleh, String> crudOther;
 
     private final static TemporaryFolder folder = new TemporaryFolder();
 
@@ -46,11 +50,15 @@ public class OrientDbCrudServiceTest {
         db = new OObjectDatabaseTx(url).create();
         OSecurity sm = db.getMetadata().getSecurity();
         sm.createUser("test", "test", "admin");
-        final WOrientConf conf = new WOrientConf("test",url,"test","test","org.wisdom.orientdb.model");
+        List<String> namespaces = Arrays.asList("org.wisdom.orientdb.model","org.wisdom.orientdb.othermodel");
+        final WOrientConf conf = new WOrientConf("test",url,"test","test",namespaces );
         conf.setTxType(NOTX);
-        final List<Class<?>> entities = new ArrayList<>(1);
+        final List<Class<?>> entities = new ArrayList<>(2);
         entities.add(Hello.class);
+        entities.add(Olleh.class);
+
         db.getEntityManager().registerEntityClass(Hello.class);
+        db.getEntityManager().registerEntityClass(Olleh.class);
 
 
         OrientDbRepoCommand repoCommand = new OrientDbRepoCommand() {
@@ -69,6 +77,7 @@ public class OrientDbCrudServiceTest {
 
 
         crud = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Hello.class);
+        crudOther = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Olleh.class);
     }
 
     @AfterClass
@@ -86,6 +95,7 @@ public class OrientDbCrudServiceTest {
     @Test
     public void entityShouldBeRegister(){
         assertThat(db.getEntityManager().getRegisteredEntities()).contains(Hello.class);
+        assertThat(db.getEntityManager().getRegisteredEntities()).contains(Olleh.class);
     }
 
     @Test
@@ -93,6 +103,15 @@ public class OrientDbCrudServiceTest {
         Hello hello = new Hello();
         hello.setName("John");
         Hello saved = crud.save(hello);
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getId()).startsWith("#");
+    }
+
+    @Test
+    public void saveShouldPersistTheInstanceForSecondNS() {
+        Olleh olleh = new Olleh();
+        olleh.setName("Doe");
+        Olleh saved = crudOther.save(olleh);
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getId()).startsWith("#");
     }
