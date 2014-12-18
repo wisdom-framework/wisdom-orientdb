@@ -20,7 +20,6 @@ import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
 import org.wisdom.orientdb.object.OrientDbRepoCommand;
-import sun.misc.CompoundEnumeration;
 
 import java.io.IOException;
 import java.net.URL;
@@ -31,7 +30,8 @@ import static java.io.File.separator;
 /**
  * created: 5/13/14.
  *
- * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
+ * @author barjo
+ * @author remi-parain
  */
 @Component(name = OrientDbCrudProvider.COMPONENT_NAME)
 @Instantiate(name = OrientDbCrudProvider.INSTANCE_NAME)
