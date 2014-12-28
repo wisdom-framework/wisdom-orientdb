@@ -133,8 +133,8 @@ public final class WOrientConf {
 
         Set<String> subkeys = new HashSet<>();
 
-        for (String key : orient.asProperties().stringPropertyNames()) {
-            subkeys.add(key.split("\\.", 2)[0]);
+        for (String key : orient.asMap().keySet()) {
+            subkeys.add(key);
         }
 
         Collection<WOrientConf> subconfs = new ArrayList<>(subkeys.size());
