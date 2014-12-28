@@ -55,6 +55,7 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
             @Override
             public void serialize(OObjectProxyMethodHandler oObjectProxyMethodHandler, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
                 jsonGenerator.writeStartObject();
+                jsonGenerator.writeEndObject();
             }
         });
     }
