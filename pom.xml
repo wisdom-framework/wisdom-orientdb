@@ -26,11 +26,11 @@
     </licenses>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> 
-        
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
         <orientdb.version>2.0-M3</orientdb.version>
-        <wisdom.version>0.7-SNAPSHOT</wisdom.version>
+        <wisdom.version>0.7.0</wisdom.version>
     </properties>
 
     <scm>
@@ -189,7 +189,7 @@
         <module>wisdom-orientdb-object</module>
     </modules>
 
-    <repositories>
+    <!--<repositories>
         <repository>
             <id>oss-snapshot</id>
             <name>oss-snapshot</name>
@@ -212,5 +212,5 @@
           <name>oss-snapshot</name>
           <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
       </pluginRepository>
-  </pluginRepositories>
+  </pluginRepositories>-->
 </project>
