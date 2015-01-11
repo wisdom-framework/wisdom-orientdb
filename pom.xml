@@ -12,7 +12,7 @@
 
     <groupId>org.wisdom-framework</groupId>
     <artifactId>wisdom-orientdb</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.2</version>
 
     <packaging>pom</packaging>
     <name>wisdom-orientdb</name>
@@ -29,7 +29,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.0-M3</orientdb.version>
+        <orientdb.version>2.0-rc1</orientdb.version>
         <wisdom.version>0.7.0</wisdom.version>
     </properties>
 
