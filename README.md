@@ -26,10 +26,10 @@ The first is to add it's dependency in your `pom.xml`.
 The second step is to configure your OrientDB database in wisdom `application.conf`
 
 ```
-orientdb.test.url = memory:todolist
-orientdb.test.user = test
-orientdb.test.pass = test
-orientdb.test.package = todolist.model
+orientdb.test.url="memory:todolist"
+orientdb.test.user="test"
+orientdb.test.pass="test"
+orientdb.test.package="todolist.model"
 ```
 
 The example above shows how to set up an orientdb database with an alias test. The `orientdb.test.package` is the name of the package that contains your entities.
