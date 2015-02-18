@@ -75,8 +75,9 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
         //Ignore javaassit injected handler created by Orientdb for json serialization
         moduleRepository.register(module);
 
-        //Not sure if orient has already been startup?
-        Orient.instance().startup();
+        if(!Orient.instance().isActive()) {
+            Orient.instance().startup();
+        }
 
         //remove the hook since we handle shutdown in the stop callback
         Orient.instance().removeShutdownHook();
@@ -97,7 +98,9 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
             bundleTracker.close();
         }
 
-        Orient.instance().shutdown();
+        if(Orient.instance().isActive()) {
+            Orient.instance().shutdown();
+        }
 
         moduleRepository.unregister(module);
     }

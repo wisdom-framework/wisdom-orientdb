@@ -5,7 +5,6 @@
 
 package org.wisdom.orientdb.runtime;
 
-import com.google.common.collect.Lists;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.AfterClass;

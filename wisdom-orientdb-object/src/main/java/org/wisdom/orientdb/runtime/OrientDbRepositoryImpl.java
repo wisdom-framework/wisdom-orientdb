@@ -29,6 +29,8 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
         this.server = new OObjectDatabasePool(repoCmd.getConf().getUrl(),
                 repoCmd.getConf().getUser(),
                 repoCmd.getConf().getPass());
+        //default pool size
+        this.server.setup(repoCmd.getConf().getPoolMin(),repoCmd.getConf().getPoolMax());
         this.repoCmd = repoCmd;
     }
 

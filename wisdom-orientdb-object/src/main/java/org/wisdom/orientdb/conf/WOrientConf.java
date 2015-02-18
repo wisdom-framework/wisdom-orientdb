@@ -24,14 +24,22 @@ public final class WOrientConf {
     public static final String ORIENTDB_PACKAGE = "package";
     public static final String ORIENTDB_AUTOLAZYLOADGING = "autolazyloading";
     public static final String ORIENTDB_TXTYPE = "txtype";
+    public static final String ORIENTDB_POOLMIN = "poolmin";
+    public static final String ORIENTDB_POOLMAX = "poolmax";
 
     private final String alias;
     private final String url;
     private final String user;
     private final String pass;
     private final List<String> nameSpaces;
+
+    //with default value
     private Boolean autolazyloading = true;
     private TXTYPE txtype = TXTYPE.OPTIMISTIC;
+    private Integer poolMin = 1;
+    private Integer poolMax = 20;
+
+
 
     public WOrientConf(String alias, String url, String user, String pass, List<String> nameSpace) {
         this.alias = alias;
@@ -49,8 +57,10 @@ public final class WOrientConf {
             config.getOrDie(ORIENTDB_PASS),
             config.getList(ORIENTDB_PACKAGE)
         );
-        this.setAutoLazyLoading(config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,true));
-        this.setTxType(config.get(ORIENTDB_TXTYPE, TXTYPE.class, TXTYPE.OPTIMISTIC));
+        this.setAutoLazyLoading(config.getBooleanWithDefault(ORIENTDB_AUTOLAZYLOADGING,autolazyloading));
+        this.setTxType(config.get(ORIENTDB_TXTYPE, TXTYPE.class, txtype));
+        this.setPoolMin(config.getIntegerWithDefault(ORIENTDB_POOLMIN,poolMin));
+        this.setPoolMax(config.getIntegerWithDefault(ORIENTDB_POOLMAX,poolMax));
     }
 
     public String getAlias() {
@@ -97,6 +107,22 @@ public final class WOrientConf {
         this.autolazyloading = lazyloading;
     }
 
+    public Integer getPoolMin(){
+        return poolMin;
+    }
+
+    public Integer getPoolMax(){
+        return poolMax;
+    }
+
+    public void setPoolMin(Integer min){
+        poolMin = min;
+    }
+
+    public void setPoolMax(Integer max){
+        poolMax = max;
+    }
+
     public Dictionary<String,Object> toDico(){
         Dictionary<String,Object> dico = new Hashtable<>(5);
         dico.put("name",alias);
@@ -105,6 +131,8 @@ public final class WOrientConf {
         dico.put(ORIENTDB_PACKAGE,nameSpaces);
         dico.put(ORIENTDB_AUTOLAZYLOADGING,autolazyloading);
         dico.put(ORIENTDB_TXTYPE,txtype);
+        dico.put(ORIENTDB_POOLMIN,poolMin);
+        dico.put(ORIENTDB_POOLMAX,poolMax);
         return dico;
     }
 
