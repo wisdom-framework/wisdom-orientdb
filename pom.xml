@@ -186,7 +186,9 @@
     </profiles>
 
     <modules>
+        <module>wisdom-orientdb-manager</module>
         <module>wisdom-orientdb-object</module>
+        <module>wisdom-orientdb-document</module>
     </modules>
 
     <!--<repositories>

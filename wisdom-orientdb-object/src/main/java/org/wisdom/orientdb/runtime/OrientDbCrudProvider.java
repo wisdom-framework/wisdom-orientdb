@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.api.content.JacksonModuleRepository;
 import org.wisdom.orientdb.conf.WOrientConf;
+import org.wisdom.orientdb.manager.OrientDbManager;
 import org.wisdom.orientdb.object.OrientDbRepoCommand;
 
 import java.io.IOException;
@@ -45,6 +46,13 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
 
     @Requires
     private JacksonModuleRepository moduleRepository;
+
+    /**
+     * Bind our lifecycle to the {@link OrientDbManager} manager.
+     **/
+    @Requires
+    private OrientDbManager manager;
+
 
     private final Logger logger = LoggerFactory.getLogger(OrientDbCrudProvider.class);
 
@@ -75,13 +83,6 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
         //Ignore javaassit injected handler created by Orientdb for json serialization
         moduleRepository.register(module);
 
-        if(!Orient.instance().isActive()) {
-            Orient.instance().startup();
-        }
-
-        //remove the hook since we handle shutdown in the stop callback
-        Orient.instance().removeShutdownHook();
-
         //Parse the configuration
         confs = WOrientConf.createFromApplicationConf(appConf);
 
@@ -96,10 +97,6 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
     private void stop(){
         if(bundleTracker != null){
             bundleTracker.close();
-        }
-
-        if(Orient.instance().isActive()) {
-            Orient.instance().shutdown();
         }
 
         moduleRepository.unregister(module);
@@ -160,6 +157,7 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
         for(ServiceRegistration sreg: registrations){
             sreg.unregister();
         }
+        registrations.clear();
     }
 
     /**
@@ -197,7 +195,6 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
             }
         }
     }
-
 
     //
     // Helper methods

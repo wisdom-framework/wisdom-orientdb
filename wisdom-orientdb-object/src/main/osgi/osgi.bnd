@@ -1,6 +1,5 @@
 Export-Package: org.iq80.snappy;version=0.3, \
     org.wisdom.orientdb.object, \
-    org.wisdom.orientdb.conf, \
     javax.persistence, \
     javax.persistence.criteria, \
     javax.persistence.metamodel, \
