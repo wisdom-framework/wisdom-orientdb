@@ -183,6 +183,8 @@ public final class WOrientConf {
                 ", nameSpace='" + nameSpaces.toString()+ '\'' +
                 ", autolazyloading=" + autolazyloading + '\'' +
                 ", txtype=" + txtype +
+                ", poolmin='" + poolMin + '\'' +
+                ", poolmax='" + poolMax + '\'' +
                 '}';
     }
 }
