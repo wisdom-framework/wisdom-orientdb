@@ -1,0 +1,5 @@
+Export-Package: org.wisdom.orientdb.document
+Private-Package: org.wisdom.orientdb.runtime
+Import-Package: org.wisdom.orientdb.conf, \
+    org.apache.hadoop.io.compress;resolution:=optional, \
+    *
