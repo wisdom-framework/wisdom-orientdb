@@ -34,7 +34,12 @@ orientdb.test.package="todolist.model"
 
 The example above shows how to set up an orientdb database with an alias test. The `orientdb.test.package` is the name of the package that contains your entities.
 
-The optional `orientdb.<alias>.autolazyloading` boolean property is a convenient way to configure the default orientDB lazy loading behavior.
+Bellows are the optional properties that allows for a more tailored configuration
+
+- `orientdb.<alias>.autolazyloading` = boolean property, a convenient way to configure the default orientDB lazy loading behavior (default is `true`).
+- `orientdb.<alias>.txtype` = `OTransaction.TXTYPE` property | the default transaction type (`TXTYPE.OPTIMISTIC` by default). 
+- `orientdb.<alias>.poolmin` = integer property, the minimun value of the database connection pool (`1` by default).
+- `orientdb.<alias>.poolmax` = integer property, the minimun value of the database connection pool (`20` by default).
 
 ### Alternative 
 
