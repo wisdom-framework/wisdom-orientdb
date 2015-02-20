@@ -7,7 +7,7 @@ after_success:
 - if [ -z ${TRAVIS_TAG} ]; then mvn deploy --settings ~/settings.xml; fi
 before_deploy:
 - mvn package
-- zip -r ${TRAVIS_TAG}.zip wisdom-orientdb-object/target/*.jar
+- zip -r ${TRAVIS_TAG}.zip wisdom-orientdb-*/target/*.jar
 deploy:
   provider: releases
   api_key:
