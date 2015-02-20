@@ -12,7 +12,7 @@
 
     <groupId>org.wisdom-framework</groupId>
     <artifactId>wisdom-orientdb</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.4</version>
 
     <packaging>pom</packaging>
     <name>wisdom-orientdb</name>
