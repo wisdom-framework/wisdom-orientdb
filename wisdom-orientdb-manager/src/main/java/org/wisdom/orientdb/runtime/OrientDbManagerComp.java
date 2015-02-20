@@ -7,7 +7,6 @@ import com.orientechnologies.orient.core.conflict.ORecordConflictStrategyFactory
 import com.orientechnologies.orient.core.engine.OEngine;
 import com.orientechnologies.orient.core.storage.OStorage;
 import org.apache.felix.ipojo.annotations.*;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
@@ -22,8 +21,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * Wrapper around {@link Orient}
- * @author barjo
+ * This component start an embedded {@link Orient} instance when starting and shut it down when it stops. <br/>
+ *
+ * It also provides an {@link OrientDbManager} service that allows for controlling the instance.
+ *
+ * Delegate to the {@link Orient} default instance.
+ *
  */
 @Component(name = OrientDbManagerComp.COMPONENT_NAME)
 @Instantiate(name = OrientDbManagerComp.INSTANCE_NAME)
@@ -38,121 +41,125 @@ class OrientDbManagerComp implements OrientDbManager {
 
     private final Logger logger = LoggerFactory.getLogger(OrientDbManagerComp.class);
 
-    private final BundleContext context;
-
-    private final Orient orient = Orient.instance();
-
-    public OrientDbManagerComp(BundleContext bundleContext) {
-        context = bundleContext;
-    }
-
     @Validate
     private void start(){
+
         //Start the orientdb instance
-        if(!orient.isActive()) {
+        if(!getInstance().isActive()) {
             logger.info("Starting Orient instance.");
-            orient.startup();
+            getInstance().startup();
         }
 
         //remove the hook since we handle shutdown in the stop callback
-        Orient.instance().removeShutdownHook();
+        getInstance().removeShutdownHook();
     }
 
     @Invalidate
     private void stop() {
-        if (orient.isActive()) {
+        if (getInstance().isActive()) {
             logger.info("Shutting down Orient instance.");
-            orient.shutdown();
+            getInstance().shutdown();
         }
     }
 
+    /**
+     * @return The default Orient instance.
+     */
+    private static Orient getInstance(){
+        return Orient.instance();
+    }
+
+    //
+    // Implement the OrientDbManager service, delegate to getInstance().
+    //
+
     @Override
     public ORecordConflictStrategyFactory getRecordConflictStrategy() {
-        return orient.getRecordConflictStrategy();
+        return getInstance().getRecordConflictStrategy();
     }
 
     @Override
     public void scheduleTask(TimerTask task, long delay, long period) {
-        orient.scheduleTask(task, delay, period);
+        getInstance().scheduleTask(task, delay, period);
     }
 
     @Override
     public void scheduleTask(TimerTask task, Date firstTime, long period) {
-        orient.scheduleTask(task, firstTime, period);
+        getInstance().scheduleTask(task, firstTime, period);
     }
 
     @Override
     public Future<?> submit(Runnable runnable) {
-        return orient.submit(runnable);
+        return getInstance().submit(runnable);
     }
 
     @Override
     public <V> Future<V> submit(Callable<V> callable) {
-        return orient.submit(callable);
+        return getInstance().submit(callable);
     }
 
     @Override
     public OStorage loadStorage(String iURL) {
-        return orient.loadStorage(iURL);
+        return getInstance().loadStorage(iURL);
     }
 
     @Override
     public OStorage registerStorage(OStorage storage) throws IOException {
-        return orient.registerStorage(storage);
+        return getInstance().registerStorage(storage);
     }
 
     @Override
     public OStorage getStorage(String dbName) {
-        return orient.getStorage(dbName);
+        return getInstance().getStorage(dbName);
     }
 
     @Override
     public void registerEngine(OEngine iEngine) {
-        orient.registerEngine(iEngine);
+        getInstance().registerEngine(iEngine);
     }
 
     @Override
     public OEngine getEngine(String engineName) {
-        return orient.getEngine(engineName);
+        return getInstance().getEngine(engineName);
     }
 
     @Override
     public Set<String> getEngines() {
-        return orient.getEngines();
+        return getInstance().getEngines();
     }
 
     @Override
     public void unregisterStorageByName(String name) {
-        orient.unregisterStorageByName(name);
+        getInstance().unregisterStorageByName(name);
     }
 
     @Override
     public void unregisterStorage(OStorage storage) {
-        orient.unregisterStorage(storage);
+        getInstance().unregisterStorage(storage);
     }
 
     @Override
     public Collection<OStorage> getStorages() {
-        return orient.getStorages();
+        return getInstance().getStorages();
     }
 
     @Override
     public OProfilerMBean getProfiler() {
-        return orient.getProfiler();
+        return getInstance().getProfiler();
     }
 
     @Override
     public void setProfiler(OProfilerMBean iProfiler) {
-        orient.setProfiler(iProfiler);
+        getInstance().setProfiler(iProfiler);
     }
 
     @Override
     public OScriptManager getScriptManager() {
-        return orient.getScriptManager();
+        return getInstance().getScriptManager();
     }
 
     @Override
     public Boolean isActive() {
-        return orient.isActive();
+        return getInstance().isActive();
     }
 }

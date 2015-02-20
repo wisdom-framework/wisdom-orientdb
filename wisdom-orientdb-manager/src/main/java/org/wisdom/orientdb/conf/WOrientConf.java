@@ -7,7 +7,7 @@ import java.util.*;
 import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE;
 
 /**
- * Convenient Object used in order to set up an {@link org.wisdom.orientdb.object.OrientDbRepository}.
+ * Convenient Object used in order to parse and/or create a wisdom-orientdb configuration.<br/>
  *
  * It must contains:
  * - alias, the repository alias
@@ -137,23 +137,28 @@ public final class WOrientConf {
     }
 
     /**
-     * Extract all WOrientConf configuration from the parent configuration.
-     * If the configuration is
+     * Extract all WOrientConf configuration with the given prefix from the parent wisdom configuration.
+     * If the prefix is <code>"orientdb"</code> and the configuration is: <br/>
+     * <code>
      * orientdb.default.url = "plocal:/home/wisdom/db"
      * orientdb.test.url = "plocal:/home/wisdom/test/db"
+     * </code>
      * <p/>
      * the sub configuration will be:
      * <p/>
+     * <code>
      * [alias:default]
      * url = "plocal:/home/wisdom/db"
      * [alias:test]
      * url = "plocal:/home/wisdom/test/db"
+     * </code>
      *
-     * @param config
-     * @return A Collection of WOrientConf retrieve from the Wisdom configuration file.
+     * @param config The wisdom configuration
+     * @param prefix The prefix of the wisdom-orientdb configuration.
+     * @return A Collection of WOrientConf retrieve from the Wisdom configuration file, or an empty set if there is no configuration under the given prefix.
      */
-    public static Collection<WOrientConf> createFromApplicationConf(Configuration config) {
-        Configuration orient = config.getConfiguration(ORIENTDB_PREFIX);
+    public static Collection<WOrientConf> createFromApplicationConf(Configuration config, String prefix) {
+        Configuration orient = config.getConfiguration(prefix);
 
         if(orient == null){
             return Collections.EMPTY_SET;
@@ -172,6 +177,30 @@ public final class WOrientConf {
         }
 
         return subconfs;
+    }
+
+    /**
+     * Extract all WOrientConf configuration from the parent configuration using the default prefix:
+     * {@link org.wisdom.orientdb.conf.WOrientConf#ORIENTDB_PREFIX}<br/>
+     * If the configuration is
+     * <code>
+     * orientdb.default.url = "plocal:/home/wisdom/db"
+     * orientdb.test.url = "plocal:/home/wisdom/test/db"
+     * </code>
+     * <p/>
+     * the sub configuration will be:
+     * <p/>
+     * <code>
+     * [alias:default]
+     * url = "plocal:/home/wisdom/db"
+     * [alias:test]
+     * url = "plocal:/home/wisdom/test/db"
+     * </code>
+     * @param config The wisdom configuration
+     * @return A Collection of WOrientConf retrieve from the Wisdom configuration file.
+     */
+    public static Collection<WOrientConf> createFromApplicationConf(Configuration config) {
+        return createFromApplicationConf(config,ORIENTDB_PREFIX);
     }
 
     @Override

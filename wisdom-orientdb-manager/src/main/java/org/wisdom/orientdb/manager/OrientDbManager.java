@@ -15,7 +15,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
 /**
- * Created by barjo on 2/18/15.
+ * A service that allows you controlling the {@link com.orientechnologies.orient.core.Orient} instance wrapper by the
+ * {@link org.wisdom.orientdb.runtime.OrientDbManagerComp} component.
+ *
  */
 public interface OrientDbManager {
     ORecordConflictStrategyFactory getRecordConflictStrategy();
