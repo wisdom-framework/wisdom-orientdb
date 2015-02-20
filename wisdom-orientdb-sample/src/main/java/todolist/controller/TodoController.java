@@ -37,7 +37,6 @@ public class TodoController extends DefaultController{
     @Model(value = Todo.class)
     private OrientDbCrud<Todo,String> todoCrud;
 
-
     @Validate
     private void start(){
         //Populate the db with some default value
@@ -56,7 +55,7 @@ public class TodoController extends DefaultController{
 
     @Route(method = GET,uri = "/")
     public Result getList(){
-        return ok(Iterables.toArray(listCrud.findAll(),TodoList.class)).json();
+        return ok(Iterables.toArray(listCrud.findAll(), TodoList.class)).json();
     }
 
     @Route(method = PUT, uri = "/")

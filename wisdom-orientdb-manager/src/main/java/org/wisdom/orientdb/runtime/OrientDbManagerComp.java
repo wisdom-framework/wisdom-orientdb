@@ -45,10 +45,9 @@ class OrientDbManagerComp implements OrientDbManager {
     private void start(){
 
         //Start the orientdb instance
-        if(!getInstance().isActive()) {
-            logger.info("Starting Orient instance.");
-            getInstance().startup();
-        }
+        logger.info("Starting Orient instance.");
+        getInstance().startup(); //no need to check if active (it's done in startup)
+
 
         //remove the hook since we handle shutdown in the stop callback
         getInstance().removeShutdownHook();
@@ -56,10 +55,8 @@ class OrientDbManagerComp implements OrientDbManager {
 
     @Invalidate
     private void stop() {
-        if (getInstance().isActive()) {
-            logger.info("Shutting down Orient instance.");
-            getInstance().shutdown();
-        }
+        logger.info("Shutting down Orient instance.");
+        getInstance().shutdown(); //no need to check if active (it's done in shutdown)
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import org.osgi.framework.BundleContext;
@@ -9,15 +10,15 @@ import org.wisdom.orientdb.document.OrientDbDocumentCommand;
 import org.wisdom.orientdb.document.OrientDbDocumentService;
 
 /**
- * Implementation of the OrientDbDocumentRepo.
+ * Implementation of the {@link org.wisdom.orientdb.document.OrientDbDocumentService}.
  */
-class OrientDbDocRepoImpl implements OrientDbDocumentService {
+class OrientDbDocServiceImpl implements OrientDbDocumentService {
     private final OPartitionedDatabasePool pool;
     private final OrientDbDocumentCommand repoCmd;
 
     private ServiceRegistration<OrientDbDocumentService> registration;
 
-    OrientDbDocRepoImpl(OrientDbDocumentCommand repoCmd,BundleContext context){
+    OrientDbDocServiceImpl(OrientDbDocumentCommand repoCmd, BundleContext context){
         pool = new OPartitionedDatabasePool(repoCmd.getConf().getUrl(),
                 repoCmd.getConf().getUser(),
                 repoCmd.getConf().getPass(),
@@ -73,8 +74,8 @@ class OrientDbDocRepoImpl implements OrientDbDocumentService {
 
     @Override
     public ODatabaseDocumentTx acquire() {
-        return pool.acquire();
+        ODatabaseDocumentTx db = pool.acquire();
+        ODatabaseRecordThreadLocal.INSTANCE.set(db);
+        return db;
     }
-
-
 }

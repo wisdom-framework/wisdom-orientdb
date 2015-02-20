@@ -5,6 +5,8 @@ Export-Package: org.iq80.snappy;version=0.3, \
     javax.persistence.metamodel, \
     javax.persistence.spi
 Private-Package: org.wisdom.orientdb.runtime
-Import-Package: org.iq80.snappy;version=0.3, \
+Import-Package: org.wisdom.orientdb.conf, \
+    org.wisdom.orientdb.manager, \
+    org.iq80.snappy;version=0.3, \
     org.apache.hadoop.io.compress;resolution:=optional, \
     *

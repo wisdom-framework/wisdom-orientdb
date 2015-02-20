@@ -17,13 +17,13 @@ import org.wisdom.orientdb.document.OrientDbDocumentCommand;
  */
 @Component
 @Instantiate
-class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientDbDocumentCommand,OrientDbDocRepoImpl> {
+class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientDbDocumentCommand,OrientDbDocServiceImpl> {
     @Requires
     private ApplicationConfiguration appConf;
 
     private final BundleContext context;
 
-    private ServiceTracker<OrientDbDocumentCommand,OrientDbDocRepoImpl> tracker;
+    private ServiceTracker<OrientDbDocumentCommand,OrientDbDocServiceImpl> tracker;
 
     private final Logger logger = LoggerFactory.getLogger(OrientDbDocumentCommandTracker.class);
 
@@ -43,9 +43,9 @@ class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientD
     }
 
     @Override
-    public OrientDbDocRepoImpl addingService(ServiceReference<OrientDbDocumentCommand> sref) {
+    public OrientDbDocServiceImpl addingService(ServiceReference<OrientDbDocumentCommand> sref) {
         OrientDbDocumentCommand creator = context.getService(sref);
-        OrientDbDocRepoImpl repo = new OrientDbDocRepoImpl(creator,context);
+        OrientDbDocServiceImpl repo = new OrientDbDocServiceImpl(creator,context);
 
         try {
             tryAcquireOrCreateIfNotProd(repo);
@@ -61,19 +61,19 @@ class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientD
 
 
     @Override
-    public void modifiedService(ServiceReference<OrientDbDocumentCommand> sref, OrientDbDocRepoImpl repo) {
+    public void modifiedService(ServiceReference<OrientDbDocumentCommand> sref, OrientDbDocServiceImpl repo) {
 
     }
 
     @Override
-    public void removedService(ServiceReference<OrientDbDocumentCommand> sref, OrientDbDocRepoImpl repo) {
+    public void removedService(ServiceReference<OrientDbDocumentCommand> sref, OrientDbDocServiceImpl repo) {
         repo.destroy(); //Destroy the repository linked to this OrientDbDocumentCommand
         logger.info("Removing OrientDbDocumentService for OrientDB alias <{}>",repo.getConf().getAlias());
         context.ungetService(sref);
     }
 
 
-    private void tryAcquireOrCreateIfNotProd(OrientDbDocRepoImpl repo) {
+    private void tryAcquireOrCreateIfNotProd(OrientDbDocServiceImpl repo) {
         //Get the connection from the pool
         try{
             repo.acquire();
