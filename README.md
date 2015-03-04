@@ -1,7 +1,5 @@
-Wisdom-OrientDB
+Wisdom-OrientDB [![Build Status](https://travis-ci.org/wisdom-framework/wisdom-orientdb.svg?branch=master)](https://travis-ci.org/wisdom-framework/wisdom-orientdb)
 ===============
-
-[![Build Status](https://travis-ci.org/wisdom-framework/wisdom-ractivejs.png)](https://travis-ci.org/wisdom-framework/wisdom-orientdb)
 
 [OrientDB](https://github.com/orientechnologies/orientdb) is an open source NoSQL DBMS. It is fully written in Java. While it's a Document Database, it also has Graph and Object database features and API.
 
