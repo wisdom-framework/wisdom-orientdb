@@ -4,12 +4,6 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-
     <groupId>org.wisdom-framework</groupId>
     <artifactId>wisdom-orientdb</artifactId>
     <version>0.2.5-SNAPSHOT</version>
@@ -29,7 +23,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.0.2</orientdb.version>
+        <orientdb.version>2.0.4</orientdb.version>
         <wisdom.version>0.7.0</wisdom.version>
     </properties>
 
