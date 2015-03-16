@@ -19,15 +19,22 @@ import static org.wisdom.api.http.HttpMethod.GET;
  * created: 5/15/14.
  *
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
+ * @version 1.0
  */
 @Controller
-@Path("")
+@Path("/")
 public class HomeController extends DefaultController{
 
     @View("home")
     private Template home;
 
 
+    /**
+     * Return the todolist view.
+     *
+     * @response.mime text/html
+     * @return list of todolist.
+     */
     @Route(method = GET,uri = "")
     public Result getList(){
         return ok(render(home));

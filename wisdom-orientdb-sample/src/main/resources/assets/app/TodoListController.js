@@ -12,7 +12,7 @@ function TodoListController() {
     var self = this;
     var _hub;
     var _model;
-    var _url = "/list/";
+    var _url = "/list";
 
     self.name = "TodoListControllerDefault";
 
@@ -57,7 +57,7 @@ function TodoListController() {
     };
 
     function encodeIdURL(root,id){
-      return root+id.replace("#","%23").replace(":","%3A");
+      return root+"/"+id.replace("#","%23").replace(":","%3A");
     }
 
     function newTodo(event) {

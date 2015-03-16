@@ -22,8 +22,9 @@ import java.util.Iterator;
 import static org.wisdom.api.http.HttpMethod.*;
 
 /**
- * created: 5/13/14.
+ * Simple TodoList rest api.
  *
+ * @version 1.0
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
 @Controller
@@ -53,16 +54,37 @@ public class TodoController extends DefaultController{
         }
     }
 
-    @Route(method = GET,uri = "/")
+    /**
+     * Return the list of todolist.
+     *
+     * @response.mime text/json
+     * @return list of todolist.
+     */
+    @Route(method = GET,uri = "")
     public Result getList(){
         return ok(Iterables.toArray(listCrud.findAll(), TodoList.class)).json();
     }
 
-    @Route(method = PUT, uri = "/")
+    /**
+     * Create a new todolist.
+
+     * @body.mime text/json
+     * @reponse.mime text/json
+     *
+     * @param list
+     * @return the newly created todolist.
+     */
+    @Route(method = PUT, uri = "")
     public Result putList(@Body TodoList list){
         return ok(listCrud.save(list)).json();
     }
 
+    /**
+     * Delete the todolist of given id.
+     *
+     * @param id of the todolist to remove.
+     * @return 200 if removed, 404 if list with given id does not exist.
+     */
     @Route(method = DELETE,uri = "/{id}")
     public Result delList(final @Parameter("id") String id){
         TodoList todoList = listCrud.findOne(id);
@@ -76,6 +98,13 @@ public class TodoController extends DefaultController{
         return ok();
     }
 
+    /**
+     * Return the todolist of given id, 404 otherwise.
+     *
+     * @response.mime text/json
+     * @param id list id
+     * @return the todolist of given id.
+     */
     @Route(method = GET,uri = "/{id}")
     public Result getTodos(final @Parameter("id") String id){
         TodoList todoList = null;
