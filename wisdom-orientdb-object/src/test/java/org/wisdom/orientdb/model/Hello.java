@@ -22,6 +22,16 @@ public class Hello {
     @Id
     private String id;
 
+    private String _secret;
+
+    public String getSecret(){
+        return _secret;
+    }
+
+    public void setSecret(String secret){
+        _secret=secret;
+    }
+
     public String getName() {
         return name;
     }

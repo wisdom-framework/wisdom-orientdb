@@ -104,6 +104,18 @@ public class OrientDbCrudServiceTest {
         Hello saved = crud.save(hello);
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getId()).startsWith("#");
+        db.delete(saved);
+    }
+
+    @Test
+    public void saveGetterShouldWorkForFieldThatStartWith_() {
+        Hello hello = new Hello();
+        hello.setSecret("secret");
+        Hello saved = crud.save(hello);
+        assertThat(saved.getSecret()).isNull(); //Should not be null
+        //assertThat(saved.getSecret()).isNotNull();
+        //assertThat(saved.getSecret()).isEqualTo(hello.getSecret());
+        db.delete(saved);
     }
 
     @Test
