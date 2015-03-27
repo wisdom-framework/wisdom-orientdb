@@ -87,7 +87,6 @@
           <version>1.1.1.6</version>
         </dependency>
 
-
           <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-api</artifactId>
@@ -98,6 +97,14 @@
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-test</artifactId>
             <version>${wisdom.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- slf4j binding used for tests -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jcl</artifactId>
+            <version>1.7.10</version>
             <scope>test</scope>
         </dependency>
 
