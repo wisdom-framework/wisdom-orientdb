@@ -1,4 +1,4 @@
-Wisdom-OrientDB [![Build Status](https://travis-ci.org/wisdom-framework/wisdom-orientdb.svg?branch=master)](https://travis-ci.org/wisdom-framework/wisdom-orientdb) [![Dependency Status](https://www.versioneye.com/user/projects/5514ff5edf7e7bf18b000698/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5514ff5edf7e7bf18b000698)
+Wisdom-OrientDB [![Build Status](https://travis-ci.org/wisdom-framework/wisdom-orientdb.svg?branch=master)](https://travis-ci.org/wisdom-framework/wisdom-orientdb) [![Dependency Status](https://www.versioneye.com/user/projects/551504e6df7e7b09ef00064b/badge.svg?style=flat)](https://www.versioneye.com/user/projects/551504e6df7e7b09ef00064b)
 ===============
 
 [OrientDB](https://github.com/orientechnologies/orientdb) is an open source NoSQL DBMS. It is fully written in Java. While it's a Document Database, it also has Graph and Object database features and API.
