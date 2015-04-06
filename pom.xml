@@ -204,7 +204,7 @@
         <module>wisdom-orientdb-document</module>
     </modules>
 
-    <!--<repositories>
+    <repositories>
         <repository>
             <id>oss-snapshot</id>
             <name>oss-snapshot</name>
@@ -227,5 +227,5 @@
           <name>oss-snapshot</name>
           <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
       </pluginRepository>
-  </pluginRepositories>-->
+  </pluginRepositories>
 </project>
