@@ -23,8 +23,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.0.5</orientdb.version>
+        <orientdb.version>2.0.6</orientdb.version>
         <wisdom.version>0.8.0</wisdom.version>
+        <sl4j.version>1.7.12</sl4j.version>
     </properties>
 
     <scm>
@@ -100,11 +101,17 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${sl4j.version}</version>
+        </dependency>
+
         <!-- slf4j binding used for tests -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jcl</artifactId>
-            <version>1.7.10</version>
+            <version>${sl4j.version}</version>
             <scope>test</scope>
         </dependency>
 
