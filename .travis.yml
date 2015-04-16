@@ -16,4 +16,12 @@ deploy:
   on:
     tags: true
     all_branches: true
-
+addons:
+  coverity_scan:
+    project:
+      name: "wisdom-framework/wisdom-orientdb"
+      description: "Build submitted via Travis CI"
+    notification_email: ${env.EMAIL}
+    build_command_prepend: "mvn clean"
+    build_command:   "mvn -DskipTests=true compile"
+    branch_pattern: quality
