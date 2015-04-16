@@ -20,7 +20,7 @@ addons:
   coverity_scan:
     project:
       name: "wisdom-framework/wisdom-orientdb"
-    notification_email: ${env.EMAIL}
+    notification_email: astrosus+orient@gmail.com
     build_command_prepend: "mvn clean"
     build_command:   "mvn -DskipTests=true compile"
     branch_pattern: quality
