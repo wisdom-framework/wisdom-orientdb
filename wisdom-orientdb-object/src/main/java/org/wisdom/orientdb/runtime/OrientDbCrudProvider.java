@@ -164,7 +164,7 @@ class OrientDbCrudProvider implements BundleTrackerCustomizer<Collection<Service
      * Simple OrientDbRepoCommand which register the Entity class in the database entity manager upon initialisation and
      * remove them upon destroy.
      */
-    class OrientDbRepoCommandImpl implements OrientDbRepoCommand {
+    static class OrientDbRepoCommandImpl implements OrientDbRepoCommand {
 
         private final WOrientConf conf;
 

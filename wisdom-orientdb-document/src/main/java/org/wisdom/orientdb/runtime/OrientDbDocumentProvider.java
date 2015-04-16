@@ -69,7 +69,7 @@ class OrientDbDocumentProvider {
     /**
      * Dummy {@link OrientDbDocumentCommand} which do nothing.
      */
-    class OrientDbDocumentCommandImpl implements OrientDbDocumentCommand {
+    static class OrientDbDocumentCommandImpl implements OrientDbDocumentCommand {
         private final WOrientConf conf;
 
         public OrientDbDocumentCommandImpl(WOrientConf conf) {
