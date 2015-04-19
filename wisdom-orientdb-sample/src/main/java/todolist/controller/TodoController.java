@@ -57,7 +57,6 @@ public class TodoController extends DefaultController{
     /**
      * Return the list of todolist.
      *
-     * @response.mime text/json
      * @return list of todolist.
      */
     @Route(method = GET,uri = "")
@@ -67,9 +66,6 @@ public class TodoController extends DefaultController{
 
     /**
      * Create a new todolist.
-
-     * @body.mime text/json
-     * @reponse.mime text/json
      *
      * @param list
      * @return the newly created todolist.
@@ -101,7 +97,6 @@ public class TodoController extends DefaultController{
     /**
      * Return the todolist of given id, 404 otherwise.
      *
-     * @response.mime text/json
      * @param id list id
      * @return the todolist of given id.
      */
@@ -121,6 +116,11 @@ public class TodoController extends DefaultController{
         return ok(todoList.getTodos()).json();
     }
 
+    /**
+     * Create a new todo.
+     *
+     * @body.sample { "content" : "Get the milk", "done" : "true" }
+     */
     @Route(method = PUT,uri = "/{id}")
     public Result createTodo(final @Parameter("id") String id,@Valid @Body Todo todo){
         TodoList todoList = listCrud.findOne(id);

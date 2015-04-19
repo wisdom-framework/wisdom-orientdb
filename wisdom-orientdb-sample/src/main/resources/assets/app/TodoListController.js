@@ -83,7 +83,7 @@ function TodoListController() {
         $.ajax({
             type: "POST",
             contentType: "application/json; charset=UTF-8",
-            url: encodeIdURL(_model.url+"/",todo.id),
+            url: encodeIdURL(_model.url,todo.id),
             data: JSON.stringify(todo)
         }).done(function() {
             //TODO notification
@@ -95,7 +95,7 @@ function TodoListController() {
 
         $.ajax({
             type: "DELETE",
-            url: encodeIdURL(_model.url+"/",todo.id)
+            url: encodeIdURL(_model.url,todo.id)
         }).done(function() {
             _model.todos.splice(index, 1);
         });
