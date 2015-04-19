@@ -1,6 +1,6 @@
 {
     "name": "wisdom-orientdb",
-    "version":"0.2.2",
+    "version":"0.2.6",
     "description": "Wisdom OrientDB integration.",
     "repository": {
         "type": "git",

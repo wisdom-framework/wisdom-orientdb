@@ -6,11 +6,12 @@
 
     <groupId>org.wisdom-framework</groupId>
     <artifactId>wisdom-orientdb</artifactId>
-    <version>0.2.5-SNAPSHOT</version>
+    <version>0.2.6</version>
 
     <packaging>pom</packaging>
     <name>wisdom-orientdb</name>
     <description>Wisdom-Orientdb wisdom framework sub-project parent pom.</description>
+    <url>https://github.com/wisdom-framework/wisdom-orientdb</url>
 
     <licenses>
         <license>
@@ -41,10 +42,14 @@
         <url>https://github.com/wisdom-framework/wisdom-orientdb/issues</url>
     </issueManagement>
 
-    <organization>
-        <name>Wisdom Framework</name>
-        <url>http://wisdom-framework.org</url>
-    </organization>
+    <developers>
+        <developer>
+            <name>Jonathan M. Bardin</name>
+            <email>astrosus+wisdom@gmail.com</email>
+            <organization>Wisdom Framework</organization>
+            <organizationUrl>http://wisdom-framework.org</organizationUrl>
+        </developer>
+    </developers>
 
     <distributionManagement>
         <snapshotRepository>
