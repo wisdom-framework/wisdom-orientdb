@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-raml-monitor-console</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>${wisdom.version}</version>
         </dependency>
         
         <!-- Test dependencies -->
@@ -157,7 +157,7 @@
             <plugin>
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-raml-maven-plugin</artifactId>
-                <version>0.1.0-SNAPSHOT</version>
+                <version>${wisdom.version}</version>
                 <configuration>
                     <baseUri>http://localhost:9000/</baseUri>
                 </configuration>
