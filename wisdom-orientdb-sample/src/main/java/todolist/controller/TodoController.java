@@ -1,8 +1,3 @@
-/*
- * Copyright 2014, Technologic Arts Vietnam.
- * All right reserved.
- */
-
 package todolist.controller;
 
 import com.google.common.collect.Iterables;

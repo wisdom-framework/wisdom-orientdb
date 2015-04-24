@@ -1,8 +1,3 @@
-/*
- * Copyright 2014, Technologic Arts Vietnam.
- * All right reserved.
- */
-
 package todolist.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
