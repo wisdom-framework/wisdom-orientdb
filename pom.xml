@@ -24,7 +24,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.0.12</orientdb.version>
+        <orientdb.version>2.1-rc5</orientdb.version>
         <wisdom.version>0.9.1</wisdom.version>
         <sl4j.version>1.7.12</sl4j.version>
     </properties>
@@ -68,7 +68,7 @@
             <exclusions>
               <exclusion>
                 <groupId>org.xerial.snappy</groupId>
-                <artifactId>snappy.java</artifactId>
+                <artifactId>snappy-java</artifactId>
               </exclusion>
             </exclusions>
         </dependency>
@@ -88,12 +88,6 @@
             <version>${orientdb.version}</version>
         </dependency>
         <dependency>
-          <groupId>org.xerial.snappy</groupId>
-          <artifactId>snappy-java</artifactId>
-          <version>1.1.1.7</version>
-        </dependency>
-
-          <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-api</artifactId>
             <version>${wisdom.version}</version>
