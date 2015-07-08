@@ -35,7 +35,6 @@ import static org.assertj.core.api.Assertions.fail;
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
 public class OrientDbCrudServiceTest {
-    private static OObjectDatabaseTx db;
     private static OrientDbCrud<Hello, String> crud;
     private static OrientDbCrud<Olleh, String> crudOther;
 
@@ -46,9 +45,6 @@ public class OrientDbCrudServiceTest {
         folder.create();
         String url = "plocal:" + folder.getRoot().getAbsolutePath();
 
-        db = new OObjectDatabaseTx(url).create();
-        OSecurity sm = db.getMetadata().getSecurity();
-        sm.createUser("test", "test", "admin");
         List<String> namespaces = Arrays.asList("org.wisdom.orientdb.model","org.wisdom.orientdb.othermodel");
         final WOrientConf conf = new WOrientConf("test",url,"test","test",namespaces );
         conf.setTxType(NOTX);
@@ -56,9 +52,14 @@ public class OrientDbCrudServiceTest {
         entities.add(Hello.class);
         entities.add(Olleh.class);
 
-        db.getEntityManager().registerEntityClass(Hello.class);
-        db.getEntityManager().registerEntityClass(Olleh.class);
-
+        try (
+            OObjectDatabaseTx db = new OObjectDatabaseTx(url).create();
+        ) {
+            OSecurity sm = db.getMetadata().getSecurity();
+            sm.createUser("test", "test", "admin");
+            db.getEntityManager().registerEntityClass(Hello.class);
+            db.getEntityManager().registerEntityClass(Olleh.class);
+        }
 
         OrientDbRepoCommand repoCommand = new OrientDbRepoCommand() {
             public WOrientConf getConf() {
@@ -73,28 +74,13 @@ public class OrientDbCrudServiceTest {
             }
         };
 
-
-
         crud = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Hello.class);
         crudOther = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Olleh.class);
     }
 
     @AfterClass
     public static void tearDown() {
-        try {
-            db.drop();
-        } finally {
-            if (!db.isClosed()) {
-                db.close();
-            }
-            folder.delete();
-        }
-    }
-
-    @Test
-    public void entityShouldBeRegister(){
-        assertThat(db.getEntityManager().getRegisteredEntities()).contains(Hello.class);
-        assertThat(db.getEntityManager().getRegisteredEntities()).contains(Olleh.class);
+        folder.delete();
     }
 
     @Test
@@ -104,7 +90,7 @@ public class OrientDbCrudServiceTest {
         Hello saved = crud.save(hello);
         assertThat(saved.getId()).isNotNull();
         assertThat(saved.getId()).startsWith("#");
-        db.delete(saved);
+        crud.delete(saved);
     }
 
     @Test
@@ -115,7 +101,7 @@ public class OrientDbCrudServiceTest {
         assertThat(saved.getSecret()).isNull(); //Should not be null
         //assertThat(saved.getSecret()).isNotNull();
         //assertThat(saved.getSecret()).isEqualTo(hello.getSecret());
-        db.delete(saved);
+        crud.delete(saved);
     }
 
     @Test
@@ -143,7 +129,7 @@ public class OrientDbCrudServiceTest {
         Hello hello = new Hello();
         hello.setName("Bob");
         Hello saved = crud.save(hello);
-        db.delete(saved);
+        crud.delete(saved);
 
         Hello bob = crud.findOne(saved.getId());
         assertThat(bob).isNull();

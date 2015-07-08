@@ -38,11 +38,10 @@ class OrientDbDocServiceImpl implements OrientDbDocumentService {
         }
         registration.unregister();
 
-        ODatabaseDocumentTx db = pool.acquire();
-        try {
+        try (
+            ODatabaseDocumentTx db = acquire();
+        ) {
             repoCmd.destroy(db); //Call the OrientDbDocumentCommand destroy callback
-        }finally {
-            db.close();
         }
 
         pool.close();
