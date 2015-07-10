@@ -3,6 +3,7 @@ package org.wisdom.orientdb.object;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.Repository;
+import org.wisdom.orientdb.conf.WOrientConf;
 
 /**
  * The OrientDbRepository is a standard wisdom db Repository providing OrientDbCrud services.
@@ -24,4 +25,9 @@ public interface OrientDbRepository extends Repository<OObjectDatabasePool> {
      * @return An active {@link OObjectDatabaseTx} instance from this repository pool.
      */
     OObjectDatabaseTx acquireDb();
+
+    /**
+     * @return This repository {@link WOrientConf} configuration.
+     */
+    WOrientConf getConf();
 }

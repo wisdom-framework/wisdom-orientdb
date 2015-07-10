@@ -17,6 +17,7 @@ import java.util.Dictionary;
 
 /**
  * Implementation of the OrientDbRepository.
+ *
  */
 class OrientDbRepositoryImpl implements OrientDbRepository {
     private final OObjectDatabasePool server;
@@ -35,6 +36,10 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
         this.repoCmd = repoCmd;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public WOrientConf getConf(){
         return repoCmd.getConf();
     }
@@ -44,6 +49,7 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
      *
      * @return An active {@link OObjectDatabaseTx} instance from this repository pool.
      */
+    @Override
     public OObjectDatabaseTx acquireDb() {
         OObjectDatabaseTx db = server.acquire();
         ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());

@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
  *
  * created: 5/9/14.
  *
- * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
+ * @author barjo
  */
 class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     private final OrientDbTransactionManager txManager;

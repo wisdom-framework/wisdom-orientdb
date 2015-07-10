@@ -4,6 +4,7 @@ import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.InitTransactionException;
 import org.wisdom.api.model.RollBackHasCauseAnException;
 import org.wisdom.api.model.TransactionManager;
+import org.wisdom.orientdb.object.OrientDbRepository;
 
 /**
  * Implementation of {@link TransactionManager} that delegates to the {@link OObjectDatabaseTx}.
@@ -11,7 +12,7 @@ import org.wisdom.api.model.TransactionManager;
  */
 class OrientDbTransactionManager implements TransactionManager{
 
-    private final OrientDbRepositoryImpl repo;
+    private final OrientDbRepository repo;
 
     private OObjectDatabaseTx db;
 

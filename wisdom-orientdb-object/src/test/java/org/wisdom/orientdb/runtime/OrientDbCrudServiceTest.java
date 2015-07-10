@@ -158,8 +158,8 @@ public class OrientDbCrudServiceTest {
 
     @Test
     public void crudShouldNotUseLazyLoadingIfSetToFalse(){
-        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(false);
-        OObjectDatabaseTx current = crud.getRepository().get().acquire();
+        crud.getRepository().getConf().setAutoLazyLoading(false);
+        OObjectDatabaseTx current = crud.getRepository().acquireDb();
 
         //trigger OrientDbCrudService#acquireDb
         Hello hello = new Hello();
@@ -169,13 +169,13 @@ public class OrientDbCrudServiceTest {
         assertThat(current.isLazyLoading()).isFalse();
 
         //reset lazy loading to true
-        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
+        crud.getRepository().getConf().setAutoLazyLoading(true);
     }
 
     @Test
     public void crudShouldUseLazyLoadingIfSetToTrue(){
-        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
-        OObjectDatabaseTx current = crud.getRepository().get().acquire();
+        crud.getRepository().getConf().setAutoLazyLoading(true);
+        OObjectDatabaseTx current = crud.getRepository().acquireDb();
 
         //trigger OrientDbCrudService#acquireDb
         Hello hello = new Hello();
@@ -187,7 +187,7 @@ public class OrientDbCrudServiceTest {
 
     @Test
     public void transactionBlockOfTypeNOTXShouldRunProperly(){
-        ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setTxType(NOTX);
+        crud.getRepository().getConf().setTxType(NOTX);
 
         Boolean result = null;
         try {
