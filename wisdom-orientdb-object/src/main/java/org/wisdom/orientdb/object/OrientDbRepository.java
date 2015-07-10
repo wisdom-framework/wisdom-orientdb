@@ -1,6 +1,7 @@
 package org.wisdom.orientdb.object;
 
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
+import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.Repository;
 
 /**
@@ -10,4 +11,17 @@ import org.wisdom.api.model.Repository;
  */
 public interface OrientDbRepository extends Repository<OObjectDatabasePool> {
 
+    /**
+     * <p>
+     * Acquire {@link OObjectDatabaseTx} instance linked to this repository.
+     * The return instance is attached to the local thread.
+     * </p>
+     * <p>
+     * It must be closed to te release to the pool, it support try with resource
+     * since {@link OObjectDatabaseTx} implements {@link AutoCloseable}.
+     * </p>
+     *
+     * @return An active {@link OObjectDatabaseTx} instance from this repository pool.
+     */
+    OObjectDatabaseTx acquireDb();
 }
