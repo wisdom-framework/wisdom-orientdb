@@ -47,7 +47,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     /**
      * Release the database connection to the pool
      */
-    private void release() {
+    private void releaseDb() {
         txManager.releaseDb();
     }
 
@@ -67,7 +67,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             acquireDb().delete(t);
         } finally {
-            release();
+            releaseDb();
         }
         return t;
     }
@@ -78,7 +78,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             acquireDb().delete(rid);
         } finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -92,7 +92,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
                 deleted.add((T) db.delete(todel));
             }
         } finally {
-            release();
+            releaseDb();
         }
 
         return deleted;
@@ -103,7 +103,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().save(t);
         } finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -117,7 +117,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
                 saved.add((T) db.save(tosave));
             }
         } finally {
-            release();
+            releaseDb();
         }
 
         return saved;
@@ -128,7 +128,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().load(new ORecordId(id));
         } finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -143,7 +143,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
                 }
             }
         } finally {
-            release();
+            releaseDb();
         }
 
         return null;
@@ -154,7 +154,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().existsUserObjectByRID(new ORecordId(id));
         } finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -163,7 +163,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().browseClass(entityClass);
         } finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -177,7 +177,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
                 entities.add((T) db.load(new ORecordId(id)));
             }
         } finally {
-            release();
+            releaseDb();
         }
 
         return entities;
@@ -196,7 +196,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
                 }
             }
         } finally {
-            release();
+            releaseDb();
         }
         return entities;
     }
@@ -206,7 +206,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().query(command, args);
         }finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -215,7 +215,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().load(entity);
         }finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -224,7 +224,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().load(entity, fetchPlan);
         }finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -233,7 +233,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             acquireDb().attach(entity);
         }finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -242,7 +242,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().detach(attachedEntity);
         }finally {
-            release();
+            releaseDb();
         }
     }
 
@@ -251,7 +251,7 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         try {
             return acquireDb().detach(entity, returnNonProxyInstance);
         }finally {
-            release();
+            releaseDb();
         }
     }
 

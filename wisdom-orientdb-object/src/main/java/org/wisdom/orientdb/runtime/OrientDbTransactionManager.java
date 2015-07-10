@@ -1,6 +1,5 @@
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.InitTransactionException;
 import org.wisdom.api.model.RollBackHasCauseAnException;
@@ -13,8 +12,6 @@ import org.wisdom.api.model.TransactionManager;
 class OrientDbTransactionManager implements TransactionManager{
 
     private final OrientDbRepositoryImpl repo;
-
-    private final OObjectDatabasePool pool;
 
     private OObjectDatabaseTx db;
 
@@ -32,13 +29,12 @@ class OrientDbTransactionManager implements TransactionManager{
 
     OrientDbTransactionManager(OrientDbRepositoryImpl repo) {
         this.repo=repo;
-        pool = repo.get();
         transaction.set(false);
     }
 
     OObjectDatabaseTx acquireDb(){
         if(db == null || db.isClosed()){
-            db = pool.acquire();
+            db = repo.acquireDb();
 
             db.setLazyLoading(repo.getConf().getAutolazyloading());
         }

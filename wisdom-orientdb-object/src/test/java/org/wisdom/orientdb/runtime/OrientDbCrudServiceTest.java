@@ -161,7 +161,7 @@ public class OrientDbCrudServiceTest {
         ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(false);
         OObjectDatabaseTx current = crud.getRepository().get().acquire();
 
-        //trigger OrientDbCrudService#acquire
+        //trigger OrientDbCrudService#acquireDb
         Hello hello = new Hello();
         hello.setName("Lazy");
         crud.save(hello);
@@ -177,7 +177,7 @@ public class OrientDbCrudServiceTest {
         ((OrientDbRepositoryImpl) crud.getRepository()).getConf().setAutoLazyLoading(true);
         OObjectDatabaseTx current = crud.getRepository().get().acquire();
 
-        //trigger OrientDbCrudService#acquire
+        //trigger OrientDbCrudService#acquireDb
         Hello hello = new Hello();
         hello.setName("Bob");
         crud.save(hello);

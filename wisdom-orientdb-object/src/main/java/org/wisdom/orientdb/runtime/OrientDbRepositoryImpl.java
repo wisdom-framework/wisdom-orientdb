@@ -1,5 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.object.db.OObjectDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
@@ -36,6 +37,17 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
 
     public WOrientConf getConf(){
         return repoCmd.getConf();
+    }
+
+    /**
+     * Acquire {@link OObjectDatabaseTx} instance linked to this repository.
+     *
+     * @return An active {@link OObjectDatabaseTx} instance from this repository pool.
+     */
+    public OObjectDatabaseTx acquireDb() {
+        OObjectDatabaseTx db = server.acquire();
+        ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+        return db;
     }
 
     void registerAllCrud(BundleContext context){

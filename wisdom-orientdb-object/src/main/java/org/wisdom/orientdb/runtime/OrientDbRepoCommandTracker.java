@@ -1,5 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.apache.felix.ipojo.annotations.*;
@@ -75,10 +76,12 @@ class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRep
 
 
     private void tryAcquireOrCreateIfNotProd(OrientDbRepositoryImpl repo) {
+        OObjectDatabaseTx  db = null;
+
         //Get the connection from the pool
         try{
-            repo.get().acquire();
-        }catch(Exception e){
+            db = repo.acquireDb();
+        } catch(Exception e){
             if(appConf.isProd()){
                 throw e;
             }
@@ -87,10 +90,14 @@ class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRep
                     repo.getConf().getAlias(),repo.getConf().getUrl(),e);
 
             //Create the database if in test or dev. mode
-            OObjectDatabaseTx db = new OObjectDatabaseTx(repo.getConf().getUrl()).create();
+            db = new OObjectDatabaseTx(repo.getConf().getUrl()).create();
+            ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+
             //Add the user as admin to the newly created db.
             db.getMetadata().getSecurity().createUser(repo.getConf().getUser(), repo.getConf().getPass(), ORole.ADMIN);
         }
 
+        //release the db to the pool
+        db.close();
     }
 }
