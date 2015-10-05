@@ -24,7 +24,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.1-rc5</orientdb.version>
+        <orientdb.version>2.1.2</orientdb.version>
         <wisdom.version>0.9.1</wisdom.version>
         <sl4j.version>1.7.12</sl4j.version>
     </properties>
@@ -127,7 +127,7 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.5</version>
+                <version>1.6.6</version>
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>

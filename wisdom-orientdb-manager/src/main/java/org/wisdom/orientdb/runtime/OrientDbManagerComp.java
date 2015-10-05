@@ -1,6 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.common.profiler.OProfilerMBean;
+import com.orientechnologies.common.profiler.OProfiler;
 import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.command.script.OScriptManager;
 import com.orientechnologies.orient.core.conflict.ORecordConflictStrategyFactory;
@@ -141,12 +141,12 @@ class OrientDbManagerComp implements OrientDbManager {
     }
 
     @Override
-    public OProfilerMBean getProfiler() {
+    public OProfiler getProfiler() {
         return getInstance().getProfiler();
     }
 
     @Override
-    public void setProfiler(OProfilerMBean iProfiler) {
+    public void setProfiler(OProfiler iProfiler) {
         getInstance().setProfiler(iProfiler);
     }
 

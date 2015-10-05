@@ -1,6 +1,6 @@
 package org.wisdom.orientdb.manager;
 
-import com.orientechnologies.common.profiler.OProfilerMBean;
+import com.orientechnologies.common.profiler.OProfiler;
 import com.orientechnologies.orient.core.command.script.OScriptManager;
 import com.orientechnologies.orient.core.conflict.ORecordConflictStrategyFactory;
 import com.orientechnologies.orient.core.engine.OEngine;
@@ -48,9 +48,9 @@ public interface OrientDbManager {
 
     Collection<OStorage> getStorages();
 
-    OProfilerMBean getProfiler();
+    OProfiler getProfiler();
 
-    void setProfiler(OProfilerMBean iProfiler);
+    void setProfiler(OProfiler iProfiler);
 
     OScriptManager getScriptManager();
 
