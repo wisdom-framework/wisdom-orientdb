@@ -1,5 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.command.OCommandRequest;
 import com.orientechnologies.orient.core.id.ORecordId;
 import com.orientechnologies.orient.core.query.OQuery;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
@@ -205,6 +206,15 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     public List<T> query(OQuery<T> command, Object ... args){
         try {
             return acquireDb().query(command, args);
+        }finally {
+            releaseDb();
+        }
+    }
+
+    @Override
+    public <RET> RET execute(OCommandRequest command, Object ... args){
+        try{
+            return acquireDb().command(command).execute(args);
         }finally {
             releaseDb();
         }

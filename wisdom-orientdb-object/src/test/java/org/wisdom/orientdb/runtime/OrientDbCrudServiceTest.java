@@ -6,6 +6,7 @@
 package org.wisdom.orientdb.runtime;
 
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
+import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -183,6 +184,11 @@ public class OrientDbCrudServiceTest {
         crud.save(hello);
 
         assertThat(current.isLazyLoading()).isEqualTo(true);
+    }
+
+    @Test
+    public void executeShouldExecuteOCommandRequest(){
+         assertThat((Integer) crud.execute(new OCommandSQL("CREATE CLASS BONJOUR"))).isGreaterThan(0);
     }
 
     @Test

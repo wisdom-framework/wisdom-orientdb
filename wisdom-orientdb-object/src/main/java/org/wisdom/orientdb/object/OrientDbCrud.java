@@ -1,6 +1,7 @@
 package org.wisdom.orientdb.object;
 
 
+import com.orientechnologies.orient.core.command.OCommandRequest;
 import com.orientechnologies.orient.core.query.OQuery;
 import org.wisdom.api.model.Crud;
 
@@ -33,6 +34,22 @@ public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
      * @return The result of the request as a list of entities.
      */
     List<T> query(OQuery<T> command, Object ... args);
+
+    /**
+     * Execute an {@link OCommandRequest} passing the optional argument {@code args} and returns an Object.
+     * {@link "http://orientdb.com/javadoc/latest/com/orientechnologies/orient/core/command/OCommandRequest.html"}
+     * <br/>
+     * example:
+     *  <code>
+     *      crud.execute(new OCommandSQL("CREATE CLASS MY_CLASS"));
+     *  </code>
+     *
+     * @param command The OCommandRequest to run
+     * @param args The optional arguments
+     * @param <RET> The return object type
+     * @return The result of the OCommandRequest execution.
+     */
+    <RET> RET execute(OCommandRequest command, Object ... args);
 
     /**
      * Load the given entity from the db and return it.
