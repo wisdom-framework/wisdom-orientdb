@@ -24,8 +24,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <orientdb.version>2.1.2</orientdb.version>
-        <wisdom.version>0.9.1</wisdom.version>
+        <orientdb.version>2.1.3</orientdb.version>
+        <wisdom.version>0.10.0-SNAPSHOT</wisdom.version>
         <sl4j.version>1.7.12</sl4j.version>
     </properties>
 
