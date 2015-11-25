@@ -18,12 +18,8 @@ class OrientDbDocServiceImpl implements OrientDbDocumentService {
 
     private ServiceRegistration<OrientDbDocumentService> registration;
 
-    OrientDbDocServiceImpl(OrientDbDocumentCommand repoCmd, BundleContext context){
-        pool = new OPartitionedDatabasePool(repoCmd.getConf().getUrl(),
-                repoCmd.getConf().getUser(),
-                repoCmd.getConf().getPass(),
-                repoCmd.getConf().getPoolMax());
-
+    OrientDbDocServiceImpl(OPartitionedDatabasePool pool, OrientDbDocumentCommand repoCmd){
+        this.pool = pool;
         this.repoCmd = repoCmd;
     }
 
@@ -44,7 +40,7 @@ class OrientDbDocServiceImpl implements OrientDbDocumentService {
             repoCmd.destroy(db); //Call the OrientDbDocumentCommand destroy callback
         }
 
-        pool.close();
+        //pool.close();
     }
 
     void register(BundleContext context) {

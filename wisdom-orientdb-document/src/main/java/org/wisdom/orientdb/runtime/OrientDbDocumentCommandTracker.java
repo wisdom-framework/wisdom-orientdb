@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.document.OrientDbDocumentCommand;
+import org.wisdom.orientdb.manager.OrientDbManager;
 
 /**
  * @author barjo
@@ -20,6 +21,9 @@ import org.wisdom.orientdb.document.OrientDbDocumentCommand;
 class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientDbDocumentCommand,OrientDbDocServiceImpl> {
     @Requires
     private ApplicationConfiguration appConf;
+
+    @Requires
+    private OrientDbManager manager;
 
     private final BundleContext context;
 
@@ -45,7 +49,11 @@ class OrientDbDocumentCommandTracker implements ServiceTrackerCustomizer<OrientD
     @Override
     public OrientDbDocServiceImpl addingService(ServiceReference<OrientDbDocumentCommand> sref) {
         OrientDbDocumentCommand creator = context.getService(sref);
-        OrientDbDocServiceImpl repo = new OrientDbDocServiceImpl(creator,context);
+        OrientDbDocServiceImpl repo = new OrientDbDocServiceImpl(manager.getDatabasePoolFactory().get(
+                        creator.getConf().getUrl(),
+                        creator.getConf().getUser(),
+                        creator.getConf().getPass()
+                ), creator);
 
         try {
             tryAcquireOrCreateIfNotProd(repo);
