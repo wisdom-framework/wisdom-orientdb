@@ -36,7 +36,7 @@ public final class WOrientConf {
     //with default value
     private Boolean autolazyloading = true;
     private TXTYPE txtype = TXTYPE.OPTIMISTIC;
-    private Integer poolMin = 1;
+    private Integer poolMin = 2;
     private Integer poolMax = 20;
 
 

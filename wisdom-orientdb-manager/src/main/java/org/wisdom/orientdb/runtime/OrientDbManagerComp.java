@@ -4,6 +4,7 @@ import com.orientechnologies.common.profiler.OProfiler;
 import com.orientechnologies.orient.core.Orient;
 import com.orientechnologies.orient.core.command.script.OScriptManager;
 import com.orientechnologies.orient.core.conflict.ORecordConflictStrategyFactory;
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePoolFactory;
 import com.orientechnologies.orient.core.engine.OEngine;
 import com.orientechnologies.orient.core.storage.OStorage;
 import org.apache.felix.ipojo.annotations.*;
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
 import org.wisdom.orientdb.manager.OrientDbManager;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
@@ -39,6 +39,8 @@ class OrientDbManagerComp implements OrientDbManager {
     @Requires
     private ApplicationConfiguration appConf;
 
+    private OPartitionedDatabasePoolFactory poolFactory;
+
     private final Logger logger = LoggerFactory.getLogger(OrientDbManagerComp.class);
 
     @Validate
@@ -48,14 +50,23 @@ class OrientDbManagerComp implements OrientDbManager {
         logger.info("Starting Orient instance.");
         getInstance().startup(); //no need to check if active (it's done in startup)
 
+        //Create the db pool factory
+        poolFactory = new OPartitionedDatabasePoolFactory();
+
+        //Set default poolmax
+        poolFactory.setMaxPoolSize(appConf.getIntegerWithDefault("orientdb.poolmax",64));
 
         //remove the hook since we handle shutdown in the stop callback
         getInstance().removeShutdownHook();
+
+
     }
 
     @Invalidate
     private void stop() {
         logger.info("Shutting down Orient instance.");
+
+        poolFactory.close();
         getInstance().shutdown(); //no need to check if active (it's done in shutdown)
     }
 
@@ -64,6 +75,16 @@ class OrientDbManagerComp implements OrientDbManager {
      */
     private static Orient getInstance(){
         return Orient.instance();
+    }
+
+
+
+    /**
+     * @return The partitioned database pool factory.
+     */
+    @Override
+    public OPartitionedDatabasePoolFactory getDatabasePoolFactory(){
+        return poolFactory;
     }
 
     //
@@ -98,11 +119,6 @@ class OrientDbManagerComp implements OrientDbManager {
     @Override
     public OStorage loadStorage(String iURL) {
         return getInstance().loadStorage(iURL);
-    }
-
-    @Override
-    public OStorage registerStorage(OStorage storage) throws IOException {
-        return getInstance().registerStorage(storage);
     }
 
     @Override
