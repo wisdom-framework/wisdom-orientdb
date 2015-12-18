@@ -16,7 +16,13 @@ import java.util.List;
  * @param <T> The type of the entity
  * @param <I> The type of the id. ( either Long, Object or String )
  */
-public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I>{
+public interface OrientDbCrud<T,I extends Serializable> extends Crud<T,I> {
+
+    /**
+     * Release the current database connection to the connection pool. Do nothing if the db connection has already been
+     * released.
+     */
+    void release();
 
     /**
      * Run an SQl query.

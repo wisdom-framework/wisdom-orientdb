@@ -1,6 +1,6 @@
 package org.wisdom.orientdb.object;
 
-import com.orientechnologies.orient.object.db.OObjectDatabasePool;
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.wisdom.api.model.Repository;
 import org.wisdom.orientdb.conf.WOrientConf;
@@ -10,7 +10,7 @@ import org.wisdom.orientdb.conf.WOrientConf;
  *
  * {@link org.wisdom.api.model.Repository}
  */
-public interface OrientDbRepository extends Repository<OObjectDatabasePool> {
+public interface OrientDbRepository extends Repository<OPartitionedDatabasePool> {
 
     /**
      * <p>

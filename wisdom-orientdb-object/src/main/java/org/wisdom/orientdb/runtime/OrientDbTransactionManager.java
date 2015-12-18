@@ -16,7 +16,6 @@ class OrientDbTransactionManager implements TransactionManager{
 
     private OObjectDatabaseTx db;
 
-
     /**
      * Flag used in order to know if the instance is used during a transaction in the current thread.
      */
@@ -36,9 +35,8 @@ class OrientDbTransactionManager implements TransactionManager{
     OObjectDatabaseTx acquireDb(){
         if(db == null || db.isClosed()){
             db = repo.acquireDb();
-
-            db.setLazyLoading(repo.getConf().getAutolazyloading());
         }
+        db.activateOnCurrentThread();
 
         return db;
     }

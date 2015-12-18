@@ -1,6 +1,5 @@
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.metadata.security.ORole;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.apache.felix.ipojo.annotations.*;
@@ -11,6 +10,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wisdom.api.configuration.ApplicationConfiguration;
+import org.wisdom.orientdb.manager.OrientDbManager;
 import org.wisdom.orientdb.object.OrientDbRepoCommand;
 
 /**
@@ -21,6 +21,9 @@ import org.wisdom.orientdb.object.OrientDbRepoCommand;
 class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRepoCommand,OrientDbRepositoryImpl> {
     @Requires
     private ApplicationConfiguration appConf;
+
+    @Requires
+    private OrientDbManager manager;
 
     private final BundleContext context;
 
@@ -47,7 +50,11 @@ class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRep
     @Override
     public OrientDbRepositoryImpl addingService(ServiceReference<OrientDbRepoCommand> sref) {
         OrientDbRepoCommand creator = context.getService(sref);
-        OrientDbRepositoryImpl  repo = new OrientDbRepositoryImpl(creator);
+        OrientDbRepositoryImpl  repo = new OrientDbRepositoryImpl(manager.getDatabasePoolFactory().get(
+                creator.getConf().getUrl(),
+                creator.getConf().getUser(),
+                creator.getConf().getPass()
+                ), creator);
 
         try {
             tryAcquireOrCreateIfNotProd(repo);
@@ -81,7 +88,10 @@ class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRep
         //Get the connection from the pool
         try{
             db = repo.acquireDb();
-        } catch(Exception e){
+        } catch (IllegalStateException ie) {
+            logger.error("Cannot acquire db: {}",repo.getConf().getAlias(),ie);
+            throw ie;
+        }catch(Exception e){
             if(appConf.isProd()){
                 throw e;
             }
@@ -91,7 +101,7 @@ class OrientDbRepoCommandTracker implements ServiceTrackerCustomizer<OrientDbRep
 
             //Create the database if in test or dev. mode
             db = new OObjectDatabaseTx(repo.getConf().getUrl()).create();
-            ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+            db.activateOnCurrentThread();
 
             //Add the user as admin to the newly created db.
             db.getMetadata().getSecurity().createUser(repo.getConf().getUser(), repo.getConf().getPass(), ORole.ADMIN);

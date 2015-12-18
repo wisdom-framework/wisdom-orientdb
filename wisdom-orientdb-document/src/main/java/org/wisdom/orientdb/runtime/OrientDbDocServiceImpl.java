@@ -34,23 +34,14 @@ class OrientDbDocServiceImpl implements OrientDbDocumentService {
         }
         registration.unregister();
 
-        try (
-            ODatabaseDocumentTx db = acquire();
-        ) {
+        try (ODatabaseDocumentTx db = acquire();) {
             repoCmd.destroy(db); //Call the OrientDbDocumentCommand destroy callback
         }
-
-        //pool.close();
     }
 
     void register(BundleContext context) {
-        ODatabaseDocumentTx db = pool.acquire();
-
-        try {
+        try(ODatabaseDocumentTx db = pool.acquire();){
             repoCmd.init(db); //Call the OrientDbDocumentCommand init callback
-        }
-        finally {
-            db.close();
         }
 
         registration = context.registerService(OrientDbDocumentService.class, this, repoCmd.getConf().toDico());

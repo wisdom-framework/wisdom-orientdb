@@ -66,7 +66,7 @@ class OrientDbManagerComp implements OrientDbManager {
     private void stop() {
         logger.info("Shutting down Orient instance.");
 
-        poolFactory.close();
+        poolFactory.close(); //close the factory and all pool
         getInstance().shutdown(); //no need to check if active (it's done in shutdown)
     }
 

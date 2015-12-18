@@ -1,7 +1,6 @@
 package org.wisdom.orientdb.runtime;
 
-import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
-import com.orientechnologies.orient.object.db.OObjectDatabasePool;
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -20,19 +19,15 @@ import java.util.Dictionary;
  *
  */
 class OrientDbRepositoryImpl implements OrientDbRepository {
-    private final OObjectDatabasePool server;
+    private final OPartitionedDatabasePool server;
     private final OrientDbRepoCommand repoCmd;
 
     private final Collection<ServiceRegistration> registrations = new ArrayList<>();
 
     private final Collection<OrientDbCrud<?,?>> crudServices = new ArrayList<>();
 
-    OrientDbRepositoryImpl(OrientDbRepoCommand repoCmd){
-        this.server = new OObjectDatabasePool(repoCmd.getConf().getUrl(),
-                repoCmd.getConf().getUser(),
-                repoCmd.getConf().getPass());
-        //default pool size
-        this.server.setup(repoCmd.getConf().getPoolMin(),repoCmd.getConf().getPoolMax());
+    OrientDbRepositoryImpl(OPartitionedDatabasePool server, OrientDbRepoCommand repoCmd){
+        this.server = server;
         this.repoCmd = repoCmd;
     }
 
@@ -51,13 +46,13 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
      */
     @Override
     public OObjectDatabaseTx acquireDb() {
-        OObjectDatabaseTx db = server.acquire();
-        ODatabaseRecordThreadLocal.INSTANCE.set(db.getUnderlying());
+        OObjectDatabaseTx db = new OObjectDatabaseTx(server.acquire());
+        db.setLazyLoading(getConf().getAutolazyloading());
         return db;
     }
 
     void registerAllCrud(BundleContext context){
-        OObjectDatabaseTx db = server.acquire();
+        OObjectDatabaseTx db =  acquireDb();
 
         repoCmd.init(db); //Call the OrientDbRepoCommand init callback
 
@@ -76,17 +71,18 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
     }
 
     void destroy(){
-        OObjectDatabaseTx db = server.acquire();
-
         for(ServiceRegistration reg: registrations){
             reg.unregister();
         }
 
-        repoCmd.destroy(db); //Call the OrientDbRepoCommand destroy callback
+        try(
+            OObjectDatabaseTx db = new OObjectDatabaseTx(server.acquire());
+        ) {
+            repoCmd.destroy(db); //Call the OrientDbRepoCommand destroy callback
+        }
 
+        //we don't close the pool in case it will be reuse
         registrations.clear();
-
-        server.close();
     }
 
     @Override
@@ -96,21 +92,21 @@ class OrientDbRepositoryImpl implements OrientDbRepository {
 
     @Override
     public String getName() {
-        return server.getName();
+        return server.getUrl();
     }
 
     @Override
     public String getType() {
-        return "orientdb-object-pool";
+        return "orientdb-partitioned-pool";
     }
 
     @Override
-    public Class<OObjectDatabasePool> getRepositoryClass() {
-        return OObjectDatabasePool.class;
+    public Class<OPartitionedDatabasePool> getRepositoryClass() {
+        return OPartitionedDatabasePool.class;
     }
 
     @Override
-    public OObjectDatabasePool get() {
+    public OPartitionedDatabasePool get() {
         return server;
     }
 }

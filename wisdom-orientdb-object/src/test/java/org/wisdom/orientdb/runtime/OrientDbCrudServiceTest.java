@@ -5,9 +5,11 @@
 
 package org.wisdom.orientdb.runtime;
 
+import com.orientechnologies.orient.core.db.OPartitionedDatabasePool;
 import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.sql.OCommandSQL;
 import com.orientechnologies.orient.object.db.OObjectDatabaseTx;
+import javassist.util.proxy.Proxy;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,7 +26,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import static com.orientechnologies.orient.core.tx.OTransaction.TXTYPE.NOTX;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +37,11 @@ import static org.assertj.core.api.Assertions.fail;
  * @author <a href="mailto:jbardin@tech-arts.com">Jonathan M. Bardin</a>
  */
 public class OrientDbCrudServiceTest {
+    static {Class workaround = Proxy.class;}
+
     private static OrientDbCrud<Hello, String> crud;
     private static OrientDbCrud<Olleh, String> crudOther;
+
 
     private final static TemporaryFolder folder = new TemporaryFolder();
 
@@ -53,14 +57,16 @@ public class OrientDbCrudServiceTest {
         entities.add(Hello.class);
         entities.add(Olleh.class);
 
-        try (
-            OObjectDatabaseTx db = new OObjectDatabaseTx(url).create();
-        ) {
-            OSecurity sm = db.getMetadata().getSecurity();
-            sm.createUser("test", "test", "admin");
-            db.getEntityManager().registerEntityClass(Hello.class);
-            db.getEntityManager().registerEntityClass(Olleh.class);
-        }
+        OPartitionedDatabasePool pool = new OPartitionedDatabasePool(url,"test","test").setAutoCreate(true);
+        OObjectDatabaseTx db = new OObjectDatabaseTx(pool.acquire());
+
+        OSecurity sm = db.getMetadata().getSecurity();
+        sm.createUser("test", "test", "admin");
+
+        db.getEntityManager().registerEntityClass(Hello.class);
+        db.getEntityManager().registerEntityClass(Olleh.class);
+
+        db.close();
 
         OrientDbRepoCommand repoCommand = new OrientDbRepoCommand() {
             public WOrientConf getConf() {
@@ -75,13 +81,22 @@ public class OrientDbCrudServiceTest {
             }
         };
 
-        crud = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Hello.class);
-        crudOther = new OrientDbCrudService<>(new OrientDbRepositoryImpl(repoCommand),Olleh.class);
+        crud = new OrientDbCrudService<>(new OrientDbRepositoryImpl(pool,repoCommand),Hello.class);
+        crudOther = new OrientDbCrudService<>(new OrientDbRepositoryImpl(pool,repoCommand),Olleh.class);
+
     }
 
     @AfterClass
     public static void tearDown() {
         folder.delete();
+    }
+
+
+    @Test
+    public void entityManagerShouldContainsEntityClass(){
+        OObjectDatabaseTx db = crud.getRepository().acquireDb();
+        assertThat(db.getEntityManager().getRegisteredEntities()).contains(Hello.class,Olleh.class);
+        db.close();
     }
 
     @Test
@@ -120,6 +135,7 @@ public class OrientDbCrudServiceTest {
         hello.setName("Bob");
         Hello saved = crud.save(hello);
 
+       // assertThat(ODatabaseRecordThreadLocal.INSTANCE.isDefined()).isTrue();
         Hello bob = crud.findOne(saved.getId());
         assertThat(bob).isNotNull();
         assertThat(bob).isEqualTo(saved);
@@ -197,27 +213,19 @@ public class OrientDbCrudServiceTest {
 
         Boolean result = null;
         try {
-            result = crud.executeTransactionalBlock(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    Hello hello = new Hello();
-                    hello.setName("Bob");
-                    Hello saved = crud.save(hello);
-                    saved.setName("Haha!");
-                    crud.save(saved);
-                    return true;
-                }
+            result = crud.executeTransactionalBlock(() -> {
+                Hello hello = new Hello();
+                hello.setName("Bob");
+                Hello saved = crud.save(hello);
+                saved.setName("Haha!");
+                crud.save(saved);
+                return true;
             });
         } catch (HasBeenRollBackException e) {
             fail("Exception should not be throw",e);
         }
 
         assertThat(result).isTrue();
-        assertThat(crud.findAll(new EntityFilter<Hello>() {
-            @Override
-            public boolean accept(Hello hello) {
-                return hello.getName().equals("Haha!");
-            }
-        })).hasSize(1);
+        assertThat(crud.findAll(hello -> hello.getName().equals("Haha!"))).hasSize(1);
     }
 }

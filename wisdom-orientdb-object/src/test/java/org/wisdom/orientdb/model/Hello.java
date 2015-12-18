@@ -15,12 +15,13 @@ import javax.persistence.Id;
  */
 @Entity
 public class Hello {
+
     public String getId() {
         return id;
     }
 
     @Id
-    private String id;
+    public String id;
 
     private String _secret;
 
@@ -29,7 +30,7 @@ public class Hello {
     }
 
     public void setSecret(String secret){
-        _secret=secret;
+        this._secret=secret;
     }
 
     public String getName() {
@@ -43,7 +44,7 @@ public class Hello {
     private String name;
 
 
-    //We override equals and hascode to test value injected in the proxy
+    //We override equals and hashcode to test value injected in the proxy
 
     @Override
     public boolean equals(Object o) {

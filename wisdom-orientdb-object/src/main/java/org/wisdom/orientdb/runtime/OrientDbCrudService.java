@@ -11,14 +11,16 @@ import org.wisdom.api.model.TransactionManager;
 import org.wisdom.orientdb.object.OrientDbCrud;
 import org.wisdom.orientdb.object.OrientDbRepository;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
- * CRUD Service Implementation using Orientdb ODatabaseObject.
- *
- * created: 5/9/14.
+ * CRUD Service Implementation which delegates to Orientdb {@link OObjectDatabaseTx}.
  *
  * @author barjo
  */
@@ -39,19 +41,12 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     /**
      * Ask the Transaction manager to give us a db, if we are in a transaction running on the local thread,
      * the existing db is returned, otherwise an db is retrieved from the pool.
+     *
      * @return An  OObjectDatabaseTx db
      */
-    private OObjectDatabaseTx acquireDb(){
+    private OObjectDatabaseTx acquireDb() {
         return txManager.acquireDb();
     }
-
-    /**
-     * Release the database connection to the pool
-     */
-    private void releaseDb() {
-        txManager.releaseDb();
-    }
-
 
     @Override
     public Class<T> getEntityClass() {
@@ -65,210 +60,119 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
 
     @Override
     public T delete(T t) {
-        try {
-            acquireDb().delete(t);
-        } finally {
-            releaseDb();
-        }
+        callAndCloseDb(db -> db.delete(t));
         return t;
     }
 
     @Override
     public void delete(String id) {
-        ORecordId rid = new ORecordId(id);
-        try {
-            acquireDb().delete(rid);
-        } finally {
-            releaseDb();
-        }
+        callAndCloseDb(db -> db.delete(new ORecordId(id)));
     }
 
     @Override
     public Iterable<T> delete(Iterable<T> ts) {
-        OObjectDatabaseTx db = acquireDb();
-        List<T> deleted = new ArrayList<>();
-
-        try {
-            for (T todel : ts) {
-                deleted.add((T) db.delete(todel));
-            }
-        } finally {
-            releaseDb();
-        }
-
-        return deleted;
+        return callAndCloseDb(db -> {
+            ts.forEach((elem) -> db.delete(elem));
+            return ts;
+        });
     }
 
     @Override
     public T save(T t) {
-        try {
-            return acquireDb().save(t);
-        } finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.save(t));
     }
 
     @Override
     public Iterable<T> save(Iterable<T> ts) {
-        List<T> saved = new ArrayList<>();
-        OObjectDatabaseTx db = acquireDb();
-
-        try {
-            for (T tosave : ts) {
-                saved.add((T) db.save(tosave));
-            }
-        } finally {
-            releaseDb();
-        }
-
-        return saved;
+        return callAndCloseDb(db ->
+                stream(ts.spliterator(), false).map(elem -> (T) db.save(elem))
+                        .collect(Collectors.toList())
+        );
     }
 
     @Override
     public T findOne(String id) {
-        try {
-            return acquireDb().load(new ORecordId(id));
-        } finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> (T) db.load(new ORecordId(id)));
     }
 
     @Override
-    public T findOne(final EntityFilter<T> tEntityFilter) {
-        OObjectDatabaseTx db = acquireDb();
-
-        try {
-            for (T entity : db.browseClass(entityClass)) {
-                if (tEntityFilter.accept(entity)) {
-                    return entity;
-                }
-            }
-        } finally {
-            releaseDb();
-        }
-
-        return null;
+    public T findOne(final EntityFilter<T> entityFilter) throws NoSuchElementException {
+        return callAndCloseDb(db ->
+                stream(db.browseClass(entityClass).spliterator(), false)
+                        .filter((entity) -> entityFilter.accept(entity)).findFirst().orElse(null)
+        );
     }
 
     @Override
     public boolean exists(String id) {
-        try {
-            return acquireDb().existsUserObjectByRID(new ORecordId(id));
-        } finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.existsUserObjectByRID(new ORecordId(id)));
     }
 
     @Override
     public Iterable<T> findAll() {
-        try {
-            return acquireDb().browseClass(entityClass);
-        } finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.browseClass(entityClass));
     }
 
     @Override
     public Iterable<T> findAll(Iterable<String> ids) {
-        OObjectDatabaseTx db = acquireDb();
-        List<T> entities = new ArrayList<>();
-
-        try {
-            for (String id : ids) {
-                entities.add((T) db.load(new ORecordId(id)));
-            }
-        } finally {
-            releaseDb();
-        }
-
-        return entities;
+        return callAndCloseDb((db) ->
+                stream(ids.spliterator(), false).map(id -> (T) db.load(new ORecordId(id)))
+                        .collect(Collectors.toList())
+        );
     }
 
     @Override
-    public Iterable<T> findAll(EntityFilter<T> tEntityFilter) {
-        OObjectDatabaseTx db = acquireDb();
-        List<T> entities = new ArrayList<>();
-
-        try {
-
-            for (T entity : db.browseClass(entityClass)) {
-                if (tEntityFilter.accept(entity)) {
-                    entities.add(entity);
-                }
-            }
-        } finally {
-            releaseDb();
-        }
-        return entities;
+    public Iterable<T> findAll(EntityFilter<T> entityFilter) {
+        return callAndCloseDb(db ->
+                stream(db.browseClass(entityClass).spliterator(), false)
+                        .filter((entity) -> entityFilter.accept(entity)).collect(Collectors.toList())
+        );
     }
 
     @Override
-    public List<T> query(OQuery<T> command, Object ... args){
-        try {
-            return acquireDb().query(command, args);
-        }finally {
-            releaseDb();
-        }
+    public void release() {
+        txManager.releaseDb();
     }
 
     @Override
-    public <RET> RET execute(OCommandRequest command, Object ... args){
-        try{
-            return acquireDb().command(command).execute(args);
-        }finally {
-            releaseDb();
-        }
+    public List<T> query(OQuery<T> command, Object... args) {
+        return callAndCloseDb(db -> db.query(command, args));
+    }
+
+    @Override
+    public <RET> RET execute(OCommandRequest command, Object... args) {
+        return callAndCloseDb(db -> db.command(command).execute(args));
     }
 
     @Override
     public T load(T entity) {
-        try {
-            return acquireDb().load(entity);
-        }finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.load(entity));
     }
 
     @Override
     public T load(T entity, String fetchPlan) {
-        try {
-            return acquireDb().load(entity, fetchPlan);
-        }finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.load(entity, fetchPlan));
     }
 
     @Override
     public void attach(T entity) {
-        try {
-            acquireDb().attach(entity);
-        }finally {
-            releaseDb();
-        }
+        acquireDb().attach(entity);
     }
 
     @Override
     public T detach(T attachedEntity) {
-        try {
-            return acquireDb().detach(attachedEntity);
-        }finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.detach(attachedEntity));
     }
 
     @Override
     public T detach(T entity, Boolean returnNonProxyInstance) {
-        try {
-            return acquireDb().detach(entity, returnNonProxyInstance);
-        }finally {
-            releaseDb();
-        }
+        return callAndCloseDb(db -> db.detach(entity, returnNonProxyInstance));
     }
 
 
     @Override
     public long count() {
-        return acquireDb().countClass(entityClass.getSimpleName());
+        return callAndCloseDb(db -> db.countClass(entityClass.getSimpleName()));
     }
 
     @Override
@@ -277,13 +181,13 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     }
 
     @Override
-    public void executeTransactionalBlock(final Runnable runnable) throws HasBeenRollBackException{
+    public void executeTransactionalBlock(final Runnable runnable) throws HasBeenRollBackException {
         txManager.begin();
 
-        try{
+        try {
             runnable.run();
             txManager.commit();
-        }catch (Exception e){
+        } catch (Exception e) {
             txManager.rollback();
             throw new HasBeenRollBackException(e);
         } finally {
@@ -292,14 +196,14 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
     }
 
     @Override
-    public <A> A executeTransactionalBlock(Callable<A> aCallable) throws HasBeenRollBackException{
+    public <A> A executeTransactionalBlock(Callable<A> aCallable) throws HasBeenRollBackException {
         txManager.begin();
 
-        try{
+        try {
             A ret = aCallable.call();
             txManager.commit();
             return ret;
-        }catch (Exception e){
+        } catch (Exception e) {
             txManager.rollback();
             throw new HasBeenRollBackException(e);
         } finally {
@@ -322,4 +226,18 @@ class OrientDbCrudService<T> implements OrientDbCrud<T, String> {
         return FluentTransaction.transaction(txManager).with(callable);
     }
 
+    /**
+     * Aquire the enclosed database, apply the given function and release the db to the pool.
+     *
+     * @param dbfunc The function to apply
+     * @param <R>    the return type of {@code dbfunc}
+     * @return the return value of calling {@code dbfunc}
+     */
+    private <R> R callAndCloseDb(Function<OObjectDatabaseTx, R> dbfunc) {
+        try {
+            return dbfunc.apply(acquireDb());
+        } finally {
+            txManager.releaseDb();
+        }
+    }
 }
