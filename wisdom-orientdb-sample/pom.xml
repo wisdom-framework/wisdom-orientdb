@@ -68,7 +68,6 @@
             <artifactId>jquery</artifactId>
             <version>2.1.0-2</version>
         </dependency>
-
         <dependency>
             <groupId>org.wisdom-framework</groupId>
             <artifactId>wisdom-orientdb-object</artifactId>
@@ -154,6 +153,7 @@
                 </executions>
             </plugin>
 
+<!--
             <plugin>
                 <groupId>org.wisdom-framework</groupId>
                 <artifactId>wisdom-raml-maven-plugin</artifactId>
@@ -170,7 +170,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>

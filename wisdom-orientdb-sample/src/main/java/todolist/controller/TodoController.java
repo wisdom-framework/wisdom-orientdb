@@ -3,9 +3,13 @@ package todolist.controller;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import javassist.util.proxy.Proxy;
+import org.apache.felix.ipojo.annotations.Requires;
 import org.apache.felix.ipojo.annotations.Validate;
 import org.wisdom.api.DefaultController;
 import org.wisdom.api.annotations.*;
+import org.wisdom.api.annotations.scheduler.Async;
+import org.wisdom.api.content.Json;
+import org.wisdom.api.http.AsyncResult;
 import org.wisdom.api.http.Result;
 import org.wisdom.orientdb.object.OrientDbCrud;
 import todolist.model.Todo;
@@ -27,11 +31,14 @@ import static org.wisdom.api.http.HttpMethod.*;
 public class TodoController extends DefaultController{
     static {Class workaround = Proxy.class;}
 
+    @Requires
+    Json json;
+
     @Model(value = TodoList.class)
-    private OrientDbCrud<TodoList,String> listCrud;
+    private volatile OrientDbCrud<TodoList,String> listCrud;
 
     @Model(value = Todo.class)
-    private OrientDbCrud<Todo,String> todoCrud;
+    private volatile OrientDbCrud<Todo,String> todoCrud;
 
     @Validate
     private void start(){
@@ -47,6 +54,8 @@ public class TodoController extends DefaultController{
             list.setTodos(Lists.newArrayList(todo));
             listCrud.save(list);
         }
+
+        listCrud.release();
     }
 
     /**
@@ -55,6 +64,7 @@ public class TodoController extends DefaultController{
      * @return list of todolist.
      */
     @Route(method = GET,uri = "")
+    @Async
     public Result getList(){
         return ok(Iterables.toArray(listCrud.findAll(), TodoList.class)).json();
     }
@@ -66,6 +76,7 @@ public class TodoController extends DefaultController{
      * @return the newly created todolist.
      */
     @Route(method = PUT, uri = "")
+    @Async
     public Result putList(@Body TodoList list){
         return ok(listCrud.save(list)).json();
     }
@@ -97,18 +108,20 @@ public class TodoController extends DefaultController{
      */
     @Route(method = GET,uri = "/{id}")
     public Result getTodos(final @Parameter("id") String id){
-        TodoList todoList = null;
+        return new AsyncResult(()->{
+            TodoList todoList = null;
 
-        try{
             todoList = listCrud.findOne(id);
-        }catch (IllegalArgumentException e){
-            return badRequest();
-        }
-        if(todoList == null){
-            return notFound();
-        }
 
-        return ok(todoList.getTodos()).json();
+            if(todoList == null){
+                return notFound();
+            }
+
+            String todos = json.mapper().writeValueAsString(todoList);
+            listCrud.release();
+
+            return ok(todos).json();
+        });
     }
 
     /**
@@ -118,30 +131,37 @@ public class TodoController extends DefaultController{
      */
     @Route(method = PUT,uri = "/{id}")
     public Result createTodo(final @Parameter("id") String id,@Valid @Body Todo todo){
-        TodoList todoList = listCrud.findOne(id);
+        return new AsyncResult(()->{
+            TodoList todoList = null;
+            todoList = listCrud.findOne(id);
 
-        if(todoList == null){
-            return notFound();
-        }
+            if(todoList == null){
+                return notFound();
+            }
 
-        if(todo == null){
-            return badRequest("Cannot create todo, content is null.");
-        }
+            if(todo == null){
+                return badRequest("Cannot create todo, content is null.");
+            }
 
-        todoList.getTodos().add(todo);
-        todoList=listCrud.save(todoList);
-        return ok(Iterables.getLast(todoList.getTodos())).json();
+            todoList.getTodos().add(todo);
+
+            todoList = listCrud.save(todoList);
+
+            //convert into json object here, to be sure that the db is call in the same thread (through the proxy).
+            String last =   json.mapper().writeValueAsString(Iterables.getLast(todoList.getTodos()));
+
+            return ok(last).json();
+        });
     }
 
     @Route(method = POST,uri = "/{id}/{todoId}")
+    @Async
     public Result updateTodo(@Parameter("id") String listId,@Parameter("todoId") String todoId,@Valid @Body Todo todo){
         TodoList todoList = listCrud.findOne(listId);
 
         if(todoList == null){
             return notFound();
         }
-
-        //TODO sometimes body is null her
 
         if(todo == null){
             return badRequest("The given todo is null");
@@ -161,6 +181,7 @@ public class TodoController extends DefaultController{
     }
 
     @Route(method = DELETE,uri = "/{id}/{todoId}")
+    @Async
     public Result delTodo(@Parameter("id") String listId,@Parameter("todoId") String todoId){
         TodoList todoList = listCrud.findOne(listId);
 
